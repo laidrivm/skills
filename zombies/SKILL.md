@@ -1,8 +1,7 @@
 ---
 name: zombies
-description: Suggest tests worth writing for a feature using the ZOMBIES heuristic (Zero, One, Many, Boundaries, Interface, Exceptions, Simple scenarios). Pass a free-text feature description, or omit args to use the current branch's diff. Outputs only the categories that apply — not a full ZOMBIES checklist.
+description: Suggest tests worth writing for a feature using the ZOMBIES heuristic (Zero, One, Many, Boundaries, Interface, Exceptions, Simple scenarios). Pass a free-text feature description, or omit args to use the current branch's diff. Outputs only the categories that apply — not a full ZOMBIES checklist. Use when the user asks what tests to write, and proactively after implementing a feature to surface test gaps.
 argument-hint: "[--base <branch>] [feature description]"
-disable-model-invocation: true
 allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(git rev-parse:*), Bash(git status:*), Bash(find:*), Bash(ls:*), Bash(grep:*), Read, Grep, Glob"
 ---
 
