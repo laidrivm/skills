@@ -33,6 +33,23 @@ ZOMBIES stands for:
 
 **Skip categories that don't apply.** A read-only endpoint may have nothing under "Many". A pure validator may have nothing under "Interface". Only list tests that are genuinely worth writing — quality over coverage.
 
+### Interface prompts
+
+When weighing the **I** letter for an HTTP/JSON endpoint, check the contract against these (skip any that don't apply):
+
+- Is every contract key present even when its value is null (no keys that vanish)?
+- Do enums arrive as strings, booleans as true/false, dates as ISO 8601 with offset?
+- Is the casing consistent across the whole payload, including error bodies and pagination metadata?
+- Does an error response carry a machine-readable `code` (and `action` where the user can act), not just a message string?
+- Are status codes right for the failure class (validation → 4xx, never 500)?
+
+### Layer routing
+
+Each suggestion belongs to a test layer:
+
+- **Z / O / M / B / I / E** letters → unit or integration tests by default.
+- **S (Simple scenarios)** describing a user-facing journey through the UI → mark the bullet with the suffix `(e2e candidate)`; these belong in the e2e smoke suite. An S bullet that is exercisable through the API alone stays unmarked (integration).
+
 ## Instructions
 
 ### 1. Locate the feature
@@ -42,7 +59,7 @@ ZOMBIES stands for:
 
 ### 2. Generate ZOMBIES suggestions
 
-For each ZOMBIES letter, ask: *is there a test here that would catch a real bug or document real behaviour?* If yes, list it. If no, skip the letter.
+For each ZOMBIES letter, ask: *is there a test here that would catch a real bug or document real behaviour?* If yes, list it. If no, skip the letter. For the I letter, walk the Interface prompts above; for the S letter, apply Layer routing.
 
 **Cross-reference against the existing test file.** This skill outputs tests *to write*, not a coverage map — so:
 
@@ -61,7 +78,7 @@ Suggestion quality bar:
 
 Group by feature area first (if the diff covers multiple features), then by ZOMBIES letter within each. **Letters always appear in ZOMBIES order — Zero, One, Many, Boundaries, Interface, Exceptions, Simple.** Skipping a letter never reorders the rest: the letters you do show must still run top-to-bottom in that fixed sequence (e.g. show Boundaries before Interface before Exceptions, even if Zero, One, and Many were all skipped). Use this format exactly:
 
-In each feature heading, name the test file the ideas belong in — the existing test file you cross-referenced, or the conventional path for a new one (this names a destination, not implementation hints).
+In each feature heading, name the test file the ideas belong in — the existing test file you cross-referenced, or the conventional path for a new one (this names a destination, not implementation hints). `(e2e candidate)` bullets belong in the e2e suite regardless of the heading's file.
 
 ```
 ## 🧟 [Feature Area] (tests/Feature/SignInCodeTest.php)
@@ -70,6 +87,10 @@ In each feature heading, name the test file the ideas belong in — the existing
 - Email field rejects values longer than 255 chars (matches migration column)
 - Sign-in code expires exactly at the 15-minute mark
 
+**Interface**
+- Error for an expired code carries code "code_expired", not only a message string
+- `expiresAt` is returned as ISO 8601 with offset
+
 **Exceptions**
 - Expired code returns a validation error
 - Already-used code cannot be redeemed twice
@@ -77,13 +98,13 @@ In each feature heading, name the test file the ideas belong in — the existing
 
 **Simple**
 - Requesting a code emails the user and creates a `SignInCode` row
+- User signs in end-to-end: request code → follow email → land authenticated (e2e candidate)
 - [partial] valid code logs the user in — existing test asserts the redirect but never asserts the code is consumed
-- [verify coverage] rate limiting on code requests — an existing test touches throttling but may not assert the limit
 ```
 
 The `🧟` prefix and `##` level are what make a feature heading stand out from the bold `**Letter**` sub-headings — keep both. If multiple features are in scope, repeat the block per feature, separating each with a `---` horizontal rule so the boundaries between features are obvious.
 
-End with a one-line summary: `X test ideas.`
+End with a one-line summary: `X test ideas (Y e2e candidates).` — omit the parenthesis when there are none.
 
 If there's nothing worth testing (e.g. trivial rename, pure config change), output exactly:
 
@@ -97,6 +118,7 @@ If there's nothing worth testing (e.g. trivial rename, pure config change), outp
 - **Skip ZOMBIES letters that don't apply.** Do not write "(none)" placeholders. Quality over coverage.
 - **Gaps only.** Skip behaviours an existing test already fully covers. Keep partially-covered behaviours, prefixed with `[partial]` and naming the missing assertion. When unsure, keep the bullet prefixed with `[verify coverage]` — never silently drop a real gap.
 - **Name the target test file** in each feature heading — existing file or conventional path for a new one.
+- **Route by layer.** Mark UI-journey Simple scenarios with `(e2e candidate)`; never mark other letters with it.
 - **Always preserve ZOMBIES order.** The displayed sections must follow Zero → One → Many → Boundaries → Interface → Exceptions → Simple. Skipping letters is fine; reordering the remaining ones is not.
 - **One heading per letter, per feature area.** Each ZOMBIES letter appears at most once within a feature area — collect all of that letter's bullets under its single heading. Never repeat a letter's heading.
 - **Be specific.** Reference actual lengths, timings, statuses, route names from the code. Generic suggestions are worthless.
@@ -104,4 +126,4 @@ If there's nothing worth testing (e.g. trivial rename, pure config change), outp
 - **No implementation hints.** Don't suggest assertions, factories, or test setup — just what to verify.
 - **Group by feature first, then by letter.** Don't dump everything under one giant ZOMBIES list when the diff spans multiple features.
 - **No preamble.** No "Here are the tests I'd suggest…". Start with the first `## [Feature Area]` heading.
-- **No closing advice** beyond the `X test ideas.` summary line.
+- **No closing advice** beyond the summary line.
