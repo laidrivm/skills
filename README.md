@@ -14,7 +14,7 @@ Personal [Claude Code skills](https://code.claude.com/docs/en/skills): each top-
 | `review-order` | Scannable review checklist grouped by feature, four-pass order (types, data flow, business logic, edge cases) |
 | `spec-generator` | Turn a vague product idea (plus sketches/notes) into a structured product spec |
 | `triage` | Group a diff into feature areas with risk tiers to decide where review time goes |
-| `warm` | Vet dependencies a branch adds against the WARM check (Worth it, Alive, Right-sized, Maintained securely) |
+| `warm` | Vet dependencies a branch adds against the WARM check (Worth it, Alive, Right-sized, Maintained securely) plus a supply-chain Safety check (install scripts, typosquatting, release freshness) |
 | `zombies` | Suggest tests worth writing via the ZOMBIES heuristic (Zero, One, Many, Boundaries, Interface, Exceptions, Simple) |
 
 Most are slash-command only (`disable-model-invocation: true`) and take an optional base branch as argument, defaulting to `main`.
@@ -35,3 +35,7 @@ It refuses to overwrite existing files or links pointing elsewhere — use `--un
 ## Adding a skill
 
 Create `<name>/SKILL.md` with `name` and `description` frontmatter; `link.sh all` picks it up automatically.
+
+## Notes
+
+Use `spec-generator` and `feature-generator` skills only if you don't want to follow [OpenSpec framework](https://github.com/fission-ai/openspec). Otherwise, don't link them to your project.
