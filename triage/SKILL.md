@@ -12,7 +12,7 @@ allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(
 
 Raw arguments: $ARGUMENTS
 
-Parse the arguments as the **base branch** to diff against. If empty, default to `main`.
+Parse the arguments as the **base branch** to diff against. If empty, detect the default branch with `git rev-parse --abbrev-ref origin/HEAD` (strip the `origin/` prefix); if that fails, fall back to `main`.
 
 ## Goal
 
@@ -24,7 +24,7 @@ Produce a **risk-ordered map** of the changes between the base branch and `HEAD`
 
 ### 1. Get the diff
 
-Run `git diff --name-status <base>...HEAD` for a file-level overview, then `git diff <base>...HEAD` to see the actual changes. If there are no changes, tell the user and stop.
+Run `git diff --name-status <base>...HEAD` for a file-level overview, `git diff --stat <base>...HEAD` for per-file sizes, then `git diff <base>...HEAD` to see the actual changes. If there are no changes, tell the user and stop.
 
 ### 2. Read the changed files
 
@@ -62,10 +62,7 @@ Otherwise: pick the tier that matches the blast radius of the change.
 
 ### 5. Identify auto-generated files
 
-Auto-generated files go in a "Skip" section at the bottom. These include:
-- Lockfiles (`composer.lock`, `package-lock.json`, `pnpm-lock.yaml`)
-- Compiled assets (`public/build/`, `dist/`)
-- Generated route/type definitions (Wayfinder action/route files, generated TS types)
+Auto-generated files go in a "Skip" section at the bottom. The shared list of auto-generated patterns lives in `../_shared/generated-files.md` (relative to this SKILL.md) — read it. If that file is unavailable, fall back to: lockfiles, compiled assets, generated route/type definitions.
 
 ### 6. Output the report
 
@@ -74,30 +71,30 @@ Use this exact format:
 ```
 ### ⚠️ High Risk
 
-**[Feature Area Name]**
+**[Feature Area Name]** (+240/−12, 6 files)
 Reason: [one sentence explaining why this is high risk]
 - path/to/file.php (added/modified)
 - path/to/other-file.php (modified)
 
-**[Another Feature Area]**
+**[Another Feature Area]** (+35/−4, 2 files)
 Reason: [one sentence]
 - path/to/file.php (added)
 
 ### Medium Risk
 
-**[Feature Area Name]**
+**[Feature Area Name]** (+80/−20, 3 files)
 Reason: [one sentence]
 - path/to/file.php (added)
+- path/to/new-name.php (renamed from path/to/old-name.php)
 
 ### Low Risk
 
-**[Feature Area Name]**
+**[Feature Area Name]** (+6/−2, 1 file)
 - path/to/file.php (modified)
 
 ### Skip
 
-**Auto-generated**
-- path/to/generated/files... (auto-generated — skip)
+**Auto-generated** — 4 files (lockfile, compiled assets) — skip
 ```
 
 End with a one-line summary: `X groups, Y high-risk files to focus on`.
@@ -108,7 +105,9 @@ End with a one-line summary: `X groups, Y high-risk files to focus on`.
 - **One group per file.** Pick the most relevant one.
 - **Group names: 2–4 words.** Short and descriptive.
 - **One-line reason per group** explaining WHY it's that risk level. Only required for High and Medium tiers — Low can skip the reason.
-- **Status suffix on each file**: `(added)`, `(modified)`, or `(deleted)`. Match `git diff --name-status`.
+- **Size suffix on each group**: `(+added/−deleted, N files)`, summed from `git diff --stat` — this is what lets the user budget review time.
+- **Status suffix on each file**: `(added)`, `(modified)`, `(deleted)`, `(renamed from old/path)`, or `(copied from old/path)`. Match `git diff --name-status` (statuses `A`/`M`/`D`/`R*`/`C*`).
+- **Skip section is a counter, not a list**: one line with the file count and what kinds of files they are — don't enumerate paths.
 - **Order tiers from highest to lowest risk.** High first, then Medium, then Low, then Skip.
 - **Omit a tier section if it's empty.**
 - **If everything fits in one tier**, say so and suggest reviewing everything: "This diff is small — review all files".

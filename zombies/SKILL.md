@@ -1,7 +1,7 @@
 ---
 name: zombies
 description: Suggest tests worth writing for a feature using the ZOMBIES heuristic (Zero, One, Many, Boundaries, Interface, Exceptions, Simple scenarios). Pass a free-text feature description, or omit args to use the current branch's diff. Outputs only the categories that apply — not a full ZOMBIES checklist.
-argument-hint: "[feature description]"
+argument-hint: "[--base <branch>] [feature description]"
 disable-model-invocation: true
 allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(git rev-parse:*), Bash(git status:*), Bash(find:*), Bash(ls:*), Bash(grep:*), Read, Grep, Glob"
 ---
@@ -12,9 +12,11 @@ allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(
 
 Raw arguments: $ARGUMENTS
 
-If arguments are provided, treat them as a **free-text feature description** (e.g. "sign-in code login flow", "image upload validation"). Locate the relevant code and tests yourself using `Grep`/`Glob`.
+If the arguments start with `--base <branch>`, use `<branch>` as the base branch and treat the rest as the feature description. Otherwise treat all arguments as a **free-text feature description** (e.g. "sign-in code login flow", "image upload validation") and locate the relevant code and tests yourself using `Grep`/`Glob`.
 
-If arguments are empty, run `git diff main...HEAD` and use the diff as the feature scope.
+If no base branch was given, detect the default branch with `git rev-parse --abbrev-ref origin/HEAD` (strip the `origin/` prefix); if that fails, fall back to `main`. Call the result `<base>`.
+
+If no feature description remains, run `git diff <base>...HEAD` and use the diff as the feature scope.
 
 ## Goal
 
@@ -37,7 +39,7 @@ ZOMBIES stands for:
 ### 1. Locate the feature
 
 - **With args**: search the codebase with `Grep`/`Glob` for files matching the description. Read the implementation files (controllers, models, actions, validators) and the existing test file if one exists.
-- **Without args**: run `git diff --name-status main...HEAD` and `git diff main...HEAD`, then read the changed implementation files. Skip auto-generated files (lockfiles, compiled assets, generated route/type definitions).
+- **Without a description**: run `git diff --name-status <base>...HEAD` and `git diff <base>...HEAD`, then read the changed implementation files. Skip auto-generated files — the shared list of patterns lives in `../_shared/generated-files.md` (relative to this SKILL.md); if unavailable, fall back to lockfiles, compiled assets, generated route/type definitions.
 
 ### 2. Generate ZOMBIES suggestions
 
@@ -47,7 +49,7 @@ For each ZOMBIES letter, ask: *is there a test here that would catch a real bug 
 
 - **Skip behaviours already fully covered** by an existing test. A covered behaviour is not a test to write; listing it buries the gaps that matter.
 - **Keep a behaviour that's only partially covered** — where a test exercises it but misses an important assertion (e.g. asserts a successful login redirect but never checks the code is consumed). Prefix the bullet with `[partial]` and name the missing assertion.
-- When unsure whether a test covers a behaviour, keep the bullet rather than dropping it — a false "already covered" silently hides a real gap.
+- When unsure whether a test covers a behaviour, keep the bullet rather than dropping it — a false "already covered" silently hides a real gap. Prefix such bullets with `[verify coverage]` so the user can tell a certain gap from a possible one.
 
 Suggestion quality bar:
 
@@ -60,8 +62,10 @@ Suggestion quality bar:
 
 Group by feature area first (if the diff covers multiple features), then by ZOMBIES letter within each. **Letters always appear in ZOMBIES order — Zero, One, Many, Boundaries, Interface, Exceptions, Simple.** Skipping a letter never reorders the rest: the letters you do show must still run top-to-bottom in that fixed sequence (e.g. show Boundaries before Interface before Exceptions, even if Zero, One, and Many were all skipped). Use this format exactly:
 
+In each feature heading, name the test file the ideas belong in — the existing test file you cross-referenced, or the conventional path for a new one (this names a destination, not implementation hints).
+
 ```
-## 🧟 [Feature Area]
+## 🧟 [Feature Area] (tests/Feature/SignInCodeTest.php)
 
 **Boundaries**
 - Email field rejects values longer than 255 chars (matches migration column)
@@ -75,6 +79,7 @@ Group by feature area first (if the diff covers multiple features), then by ZOMB
 **Simple**
 - Requesting a code emails the user and creates a `SignInCode` row
 - [partial] valid code logs the user in — existing test asserts the redirect but never asserts the code is consumed
+- [verify coverage] rate limiting on code requests — an existing test touches throttling but may not assert the limit
 ```
 
 The `🧟` prefix and `##` level are what make a feature heading stand out from the bold `**Letter**` sub-headings — keep both. If multiple features are in scope, repeat the block per feature, separating each with a `---` horizontal rule so the boundaries between features are obvious.
@@ -91,7 +96,8 @@ If there's nothing worth testing (e.g. trivial rename, pure config change), outp
 
 - **Don't stub the tests.** This skill outputs ideas only — the user writes the tests.
 - **Skip ZOMBIES letters that don't apply.** Do not write "(none)" placeholders. Quality over coverage.
-- **Gaps only.** Skip behaviours an existing test already fully covers. Keep partially-covered behaviours, prefixed with `[partial]` and naming the missing assertion. When unsure, keep the bullet — never silently drop a real gap.
+- **Gaps only.** Skip behaviours an existing test already fully covers. Keep partially-covered behaviours, prefixed with `[partial]` and naming the missing assertion. When unsure, keep the bullet prefixed with `[verify coverage]` — never silently drop a real gap.
+- **Name the target test file** in each feature heading — existing file or conventional path for a new one.
 - **Always preserve ZOMBIES order.** The displayed sections must follow Zero → One → Many → Boundaries → Interface → Exceptions → Simple. Skipping letters is fine; reordering the remaining ones is not.
 - **One heading per letter, per feature area.** Each ZOMBIES letter appears at most once within a feature area — collect all of that letter's bullets under its single heading. Never repeat a letter's heading.
 - **Be specific.** Reference actual lengths, timings, statuses, route names from the code. Generic suggestions are worthless.

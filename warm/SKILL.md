@@ -1,8 +1,7 @@
 ---
 name: warm
-description: 🌡️ Evaluate every dependency a branch pulls in — client or server, any language — against the WARM check (Worth it, Alive, Right-sized, Maintained securely). Diffs the branch against a base, finds newly added or upgraded direct dependencies across all manifests, and scores each one. Use when the user asks to "WARM check" a branch, vet new dependencies, or review what a PR adds to the dependency tree.
+description: Evaluate every dependency a branch pulls in — client or server, any language — against the WARM check (Worth it, Alive, Right-sized, Maintained securely). Diffs the branch against a base, finds newly added or upgraded direct dependencies across all manifests, and scores each one. Use when the user asks to "WARM check" a branch, vet new dependencies, or review what a PR adds to the dependency tree — and proactively after you add or upgrade a dependency yourself.
 argument-hint: "[base branch]"
-disable-model-invocation: true
 allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(git rev-parse:*), Bash(git status:*), Bash(git show:*), Bash(npm audit:*), Bash(npm view:*), Bash(composer audit:*), Bash(pip-audit:*), Bash(cat:*), Bash(find:*), Bash(ls:*), Bash(grep:*), Read, Grep, Glob, WebSearch, WebFetch"
 ---
 
@@ -12,7 +11,7 @@ allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(
 
 Raw arguments: $ARGUMENTS
 
-Parse the arguments as the **base branch** to diff against. If empty, default to `main`.
+Parse the arguments as the **base branch** to diff against. If empty, detect the default branch with `git rev-parse --abbrev-ref origin/HEAD` (strip the `origin/` prefix); if that fails, fall back to `main`.
 
 ## Goal
 
@@ -51,8 +50,11 @@ For each changed manifest, run `git diff <base>...HEAD -- <manifest>` and extrac
 
 **Scope:**
 - **New direct dependencies** → full WARM evaluation.
-- **Version upgrades of existing direct dependencies** → evaluate only **A** and **M** (Worth-it and Right-sized were already decided when it was first added); note the version delta.
+- **Minor/patch upgrades of existing direct dependencies** → evaluate only **A** and **M** (Worth-it and Right-sized were already decided when it was first added); note the version delta.
+- **Major upgrades** (e.g. 7.x → 8.x) → evaluate **A**, **M**, and **R** — majors often change footprint and API surface.
 - **Removed dependencies** → ignore.
+
+If **only lockfiles changed** (transitive bumps, `npm audit fix`) with no manifest touched, skip the full WARM: run the ecosystem's audit tool on the branch state, report any advisories found, and note that only transitive dependencies moved. Then stop.
 
 If no manifests changed, output exactly:
 
@@ -68,7 +70,7 @@ Look up what you need to answer each letter honestly. Sources, in order of prefe
 - **W (Worth it)**: read how the branch actually *uses* the dependency (`Grep` the import/require/use sites) and judge the surface area you depend on. A date-formatter used in one component is a different proposition than an HTTP client used everywhere.
 - **A (Alive)**: check the registry/repo for last release date and recent commit activity. Use `npm view <pkg> time.modified` / `WebFetch` the registry or repo page. Note the latest release date and whether the repo is archived.
 - **R (Right-sized)**: compare the dependency's footprint (sub-dependencies, install size, breadth of API) against the slice the branch uses. Pulling a 40-dependency framework to call one helper is not right-sized.
-- **M (Maintained securely)**: check for known advisories. Prefer ecosystem tooling when available (`npm audit`, `composer audit`, `pip-audit`), otherwise `WebSearch` the package name + "CVE"/"advisory" and check the advisory database. Report the resolved version and whether a fixed version exists.
+- **M (Maintained securely)**: check for known advisories. Prefer ecosystem tooling when available (`npm audit`, `composer audit`, `pip-audit`). If the tool isn't installed, don't install it — go straight to `WebSearch` the package name + "CVE"/"advisory" and check the advisory database, and say which method you used. Report the resolved version and whether a fixed version exists.
 
 **Honesty rule:** if you cannot verify something (no network, registry unreachable, ambiguous package), say what you checked and mark that letter `unknown` — never fabricate a release date, version, or CVE.
 
