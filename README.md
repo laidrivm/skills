@@ -10,6 +10,7 @@ Personal [Claude Code skills](https://code.claude.com/docs/en/skills): each top-
 | `code-review` | Review staged changes or a specific area, optionally delegating to a chosen agent |
 | `feature-generator` | Expand `spec.md` into a dependency-ordered `features.md`, and keep the two in sync |
 | `first-five` | Scan a diff against the First Five checklist (error handling, input boundaries, external calls, state mutations, assumed dependencies) |
+| `playwright-cli` | Vendored from [microsoft/playwright-cli](https://github.com/microsoft/playwright-cli) — reference for driving a browser via the Playwright CLI; do not edit, see Skill provenance |
 | `preflight` | Production pre-flight checklist for a branch: env vars, config, migrations — everything needed once it merges |
 | `review-order` | Scannable review checklist grouped by feature, four-pass order (types, data flow, business logic, edge cases) |
 | `spec-generator` | Turn a vague product idea (plus sketches/notes) into a structured product spec |
@@ -35,6 +36,23 @@ It refuses to overwrite existing files or links pointing elsewhere — use `--un
 ## Adding a skill
 
 Create `<name>/SKILL.md` with `name` and `description` frontmatter; `link.sh all` picks it up automatically.
+
+## Skill provenance
+
+Skills listed in `skills-lock.json` are **vendored** — reference docs for someone else's tool, never edit them locally (edits get wiped on re-vendor, and an unedited copy is what keeps the doc in sync with the binary); re-vendor to update. Everything else is **owned** — forked or written here, edit freely via fix & capture. The lock's `computedHash` doubles as a drift detector: if it stops matching, someone edited a vendored skill.
+
+To re-vendor (the skills CLI expects `.claude/skills/`, but this repo keeps skills at the root, so the move is manual):
+
+```bash
+cd /Users/laidrivm/Projects/skills
+npx -y skills add microsoft/playwright-cli --skill playwright-cli --agent claude-code
+rm -rf ./playwright-cli && mv .claude/skills/playwright-cli ./playwright-cli
+rm -rf .claude
+git diff            # see what changed upstream
+git add -A && git commit -m "re-vendor playwright-cli skill"
+```
+
+The installer updates the hash in `skills-lock.json` itself, so the lock stays consistent without hand-editing.
 
 ## Notes
 
