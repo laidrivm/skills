@@ -43,6 +43,14 @@ When weighing the **I** letter for an HTTP/JSON endpoint, check the contract aga
 - Does an error response carry a machine-readable `code` (and `action` where the user can act), not just a message string?
 - Are status codes right for the failure class (validation → 4xx, never 500)?
 
+**Only when the feature ships UI components** — the UI's contract with assistive technologies is also an interface. Check:
+
+- Is every interactive element reachable and operable by keyboard alone?
+- Are state changes (loading, success, error, expiry) announced — `role="status"`, or `role="alert"` for genuinely urgent ones?
+- Does the element appear in the accessibility tree with the right role and an accessible name (label / alt)?
+
+If the diff contains no UI, skip this block silently.
+
 ### Layer routing
 
 Each suggestion belongs to a test layer:
