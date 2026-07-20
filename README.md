@@ -13,6 +13,7 @@ Personal [Claude Code skills](https://code.claude.com/docs/en/skills): each top-
 | `playwright-cli` | Vendored from [microsoft/playwright-cli](https://github.com/microsoft/playwright-cli) — reference for driving a browser via the Playwright CLI; do not edit, see Skill provenance |
 | `preflight` | Production pre-flight checklist for a branch: env vars, config, migrations — everything needed once it merges |
 | `review-order` | Scannable review checklist grouped by feature, four-pass order (types, data flow, business logic, edge cases) |
+| `session-wrapup` | End-of-session debrief: confidence check, fix & capture pass, OpenSpec state + next command, optional save-point doc |
 | `spec-generator` | Turn a vague product idea (plus sketches/notes) into a structured product spec |
 | `triage` | Group a diff into feature areas with risk tiers to decide where review time goes |
 | `warm` | Vet dependencies a branch adds against the WARM check (Worth it, Alive, Right-sized, Maintained securely) plus a supply-chain Safety check (install scripts, typosquatting, release freshness) |
