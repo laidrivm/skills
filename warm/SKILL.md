@@ -2,7 +2,7 @@
 name: warm
 description: Evaluate every dependency a branch pulls in — client or server, any language — against the WARM check (Worth it, Alive, Right-sized, Maintained securely) plus a supply-chain Safety check (install scripts, typosquatting, release freshness). Diffs the branch against a base, finds newly added or upgraded direct dependencies across all manifests, and scores each one. Use when the user asks to "WARM check" a branch, vet new dependencies, or review what a PR adds to the dependency tree — and proactively after you add or upgrade a dependency yourself.
 argument-hint: "[base branch]"
-allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(git rev-parse:*), Bash(git status:*), Bash(git show:*), Bash(npm audit:*), Bash(npm view:*), Bash(composer audit:*), Bash(pip-audit:*), Bash(cat:*), Bash(find:*), Bash(ls:*), Bash(grep:*), Read, Grep, Glob, WebSearch, WebFetch"
+allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(git rev-parse:*), Bash(git status:*), Bash(git show:*), Bash(bun info:*), Bash(bun audit:*), Bash(composer audit:*), Bash(pip-audit:*), Bash(curl:*), Bash(cat:*), Bash(find:*), Bash(ls:*), Bash(grep:*), Read, Grep, Glob, WebSearch, WebFetch"
 ---
 
 # WARM
@@ -29,6 +29,16 @@ Plus a fifth, supply-chain check:
 - **S**afety — is this the package it claims to be, and is this release safe to install? Install scripts, identity/typosquatting, release freshness.
 
 **This is about direct dependencies you chose to add.** The four questions are decisions *you* make about *your* dependency — they don't apply to transitive packages dragged in underneath. Evaluate direct additions; only mention transitive packages under **M** when they carry a known advisory.
+
+## As a step in the pre-merge sequence
+
+WARM is a **pre-merge gate**, not just a report. When an agent runs the pre-merge sequence rather than the user invoking `/warm` by hand, this skill is one ordered step in it, and the step behaves like this:
+
+- **Precondition** — run only if a dependency manifest changed between the base and `HEAD` (step 1 answers this). No manifest changed → the step is a no-op that passes; don't ask the user, don't linger.
+- **Runs before the code-quality steps**, not after. A **Hold** means the branch shouldn't be installed, let alone reviewed or merged — finding that out after a full test-and-review pass wastes the pass.
+- **Exit condition** — the step **passes** when no dependency is left on **Hold** and no ❌ on **M** is unresolved. **Keep** and **Reconsider** verdicts do not block: they are the user's call, recorded and carried forward.
+- **Hold blocks the sequence.** Stop there, surface the finding, and wait for the user. Don't run the remaining steps against a branch with a suspected supply-chain problem, and never resolve it by installing or upgrading on your own.
+- **Emit the gate line** (below) as the last line of output so the driving agent can read the outcome without re-parsing the report.
 
 ## Instructions
 
@@ -60,12 +70,13 @@ For each changed manifest, run `git diff <base>...HEAD -- <manifest>` and extrac
 
 **S applies to every addition and upgrade** — a compromised maintainer account ships through a version bump just as easily as through a new install.
 
-If **only lockfiles changed** (transitive bumps, `npm audit fix`) with no manifest touched, skip the full WARM: run the ecosystem's audit tool on the branch state, report any advisories found, and note that only transitive dependencies moved. Then stop.
+If **only lockfiles changed** (transitive bumps, an audit autofix) with no manifest touched, skip the full WARM: run the ecosystem's audit tool on the branch state, report any advisories found, and note that only transitive dependencies moved. Then stop.
 
 If no manifests changed, output exactly:
 
 ```
 ✅ No dependencies added or upgraded on this branch.
+WARM gate: PASS — no manifests changed.
 ```
 …and stop.
 
@@ -74,10 +85,24 @@ If no manifests changed, output exactly:
 Look up what you need to answer each letter honestly. Sources, in order of preference:
 
 - **W (Worth it)**: read how the branch actually *uses* the dependency (`Grep` the import/require/use sites) and judge the surface area you depend on. A date-formatter used in one component is a different proposition than an HTTP client used everywhere.
-- **A (Alive)**: check the registry/repo for last release date and recent commit activity. Use `npm view <pkg> time.modified` / `WebFetch` the registry or repo page. Note the latest release date and whether the repo is archived.
+**JS/TS lookups use `bun`, not `npm`:**
+
+```bash
+bun info <pkg>                  # version, license, deps, dist-tags, maintainers
+bun info <pkg> time.created     # 2015-09-11T02:41:33.521Z
+bun info <pkg> time.modified    # last publish
+bun info <pkg> repository.url   # git+https://github.com/preactjs/preact.git
+bun info <pkg> scripts          # {"postinstall": "node install.js"}
+bun info <pkg> --json           # everything at once
+curl -s https://api.npmjs.org/downloads/point/last-week/<pkg>
+```
+
+Three constraints: `bun info` takes **one field per call** — `bun info preact name version` prints only `name`, so either one call per field or `--json` and parse it; it must run **inside a directory with a `package.json`** or it errors out; and bun has **no download counts**, so weekly downloads still come from the npmjs API via `curl`.
+
+- **A (Alive)**: check the registry/repo for last release date and recent commit activity. Use `bun info <pkg> time.modified` / `WebFetch` the repo page. Note the latest release date and whether the repo is archived.
 - **R (Right-sized)**: compare the dependency's footprint (sub-dependencies, install size, breadth of API) against the slice the branch uses. Pulling a 40-dependency framework to call one helper is not right-sized.
-- **M (Maintained securely)**: check for known advisories. Prefer ecosystem tooling when available (`npm audit`, `composer audit`, `pip-audit`). If the tool isn't installed, don't install it — go straight to `WebSearch` the package name + "CVE"/"advisory" and check the advisory database, and say which method you used. Report the resolved version and whether a fixed version exists.
-- **S (Safety)** — three checks per dependency (for npm use `npm view <pkg>`; other ecosystems: `WebFetch` the registry page):
+- **M (Maintained securely)**: check for known advisories. Prefer ecosystem tooling when available (`bun audit`, `composer audit`, `pip-audit`). If the tool isn't installed, don't install it — go straight to `WebSearch` the package name + "CVE"/"advisory" and check the advisory database, and say which method you used. Report the resolved version and whether a fixed version exists.
+- **S (Safety)** — three checks per dependency (JS/TS: `bun info <pkg> scripts`, `bun info <pkg> repository.url`, `bun info <pkg> time.modified`, plus the downloads `curl`; other ecosystems: `WebFetch` the registry page):
   1. **Install scripts**: does the package declare `preinstall`/`postinstall` (or the ecosystem's equivalent lifecycle hooks)? A script that downloads and executes a binary or opaque bundle → ❌. A build-related script in a package that plausibly needs one (native addons) → ⚠️, name what it runs.
   2. **Identity**: the name is not a typo/suffix neighbour of a popular package (`lodash` vs `Iodash`, `eslint-config-*` squats); the `repository` field points to a live repo that actually publishes this package; age and download counts are plausible for what the package claims to be. Any mismatch → ❌.
   3. **Release freshness**: the resolved version was published fewer than ~7 days ago on a long-established package → ⚠️ (compromised-maintainer pattern); combined with a newly appeared install script → ❌.
@@ -140,10 +165,24 @@ Order dependencies by concern: ❌ verdicts first, then ⚠️, then clean **Kee
 **Verdict: Hold** — likely typosquat with a malicious install script. Do not install; verify the intended package name.
 ```
 
-End with a one-line summary: `N dependencies evaluated — X keep, Y reconsider, Z replace/patch, H hold.`
+End with a one-line summary, then the gate line:
+
+```
+4 dependencies evaluated — 2 keep, 1 reconsider, 1 hold.
+WARM gate: BLOCKED — eslint-config-prettler on Hold.
+```
+
+The gate line is exactly one of:
+
+- `WARM gate: PASS — no manifests changed.`
+- `WARM gate: PASS — N dependencies vetted.`
+- `WARM gate: BLOCKED — <package> on Hold.` (name every held package)
+- `WARM gate: BLOCKED — <package> has an unresolved advisory.` (❌ on **M** with no fixed version taken)
 
 ## Rules
 
+- **Always end with the gate line.** It's the step's result, and the only line the driving agent needs — even in the no-manifests-changed case, where it replaces the `✅ No dependencies added` line.
+- **BLOCKED stops the sequence, it doesn't fix it.** Don't install, upgrade, pin, or remove anything to clear a gate — report and hand back to the user.
 - **A ❌ on S short-circuits.** When Safety fails, the other letters don't matter — report the S finding, verdict **Hold**, and move on; don't pad the entry with W/A/R/M analysis of a package that shouldn't be installed at all.
 - **Judge only what the branch pulls in.** Don't audit the whole pre-existing dependency tree — only additions and upgrades since the base branch.
 - **Direct dependencies get the full WARM.** Transitive packages appear only under **M**, and only when they carry a known advisory.
