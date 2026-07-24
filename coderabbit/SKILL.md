@@ -1,0 +1,113 @@
+---
+name: coderabbit
+description: Chew through CodeRabbit's review comments on a PR — fetch them all, parse the severity line, drop Trivial/Minor into a "skipped, with reason" list, verify Major and above against the current code, show a fix / don't-fix plan, and apply only after approval. Use when the user asks to process, triage, or address CodeRabbit comments on a PR.
+argument-hint: "[PR number] [--all]"
+disable-model-invocation: true
+allowed-tools: "Bash(gh api:*), Bash(gh pr view:*), Bash(gh pr list:*), Bash(git diff:*), Bash(git log:*), Bash(git rev-parse:*), Bash(git status:*), Read, Edit, Grep, Glob"
+---
+
+# CodeRabbit
+
+## Arguments
+
+Raw arguments: $ARGUMENTS
+
+- A number → that PR. If absent, resolve the PR for the current branch with `gh pr view --json number,headRepositoryOwner,headRepository,url`. If there is no PR, say so and stop.
+- `--all` → also fix 🔵 Trivial and 🟡 Minor instead of skipping them.
+
+Get `OWNER/REPO` from `gh repo view --json nameWithOwner` unless the argument carries its own.
+
+## Goal
+
+Every CodeRabbit finding on the PR gets an explicit disposition — **fixed**, **skipped (with reason)**, or **rejected (with reason)**. Nothing falls off the list silently. The count you report must equal the count you fetched.
+
+## Instructions
+
+### 1. Fetch
+
+```bash
+gh api "repos/OWNER/REPO/pulls/N/comments?per_page=100" --paginate
+gh api "repos/OWNER/REPO/issues/N/comments?per_page=100" --paginate
+```
+
+The first call returns inline review comments (where the findings live); the second returns the walkthrough / summary comments (where CodeRabbit sometimes parks extra findings in a collapsed "Outside diff range" or "Nitpick" section — read those bodies too, they contain findings that never became inline comments).
+
+Keep only comments whose `user.login` starts with `coderabbitai`. Record for each: `id`, `path`, `line` (or `original_line`), `body`, `in_reply_to_id`.
+
+Drop replies (`in_reply_to_id` set) and any comment already marked resolved or outdated — but **count them in the total** and list them under skipped as `already resolved`.
+
+### 2. Parse severity
+
+Each finding opens with a machine-readable line:
+
+```
+_🎯 Functional Correctness_ | _🟠 Major_ | _⚡ Quick win_
+_📐 Maintainability & Code Quality_ | _🔵 Trivial_ | _⚡ Quick win_
+```
+
+→ category | severity | effort. Severity ladder, low to high: `🔵 Trivial` < `🟡 Minor` < `🟠 Major` < `🔴 Critical`.
+
+If a comment has no such line, infer from its heading (`⚠️ Potential issue` → Major, `🛠️ Refactor suggestion` / `🧹 Nitpick` → Minor) and mark the severity `(inferred)` in the report.
+
+Also pull out of the body, when present:
+- the suggested diff (```suggestion block or fenced diff)
+- the **Prompt for AI Agents** block — it's the finding restated for you, use it
+
+### 3. Sort
+
+- 🔵 Trivial, 🟡 Minor → **skipped**, one line each with the reason (`below severity threshold`). No verification, no reading files. With `--all`, treat them as Major instead.
+- 🟠 Major, 🔴 Critical → **verify** each one.
+
+### 4. Verify each Major+ against the current code
+
+Read the file at the referenced path and line **as it is now**. The comment may be stale — the code may have moved, already been fixed, or the bot may simply be wrong.
+
+Decide one of:
+- **fix** — the problem is real and still present
+- **already fixed** — the code no longer has it
+- **reject** — the bot is wrong, or the suggestion breaks something else. Say concretely why.
+
+Ponytail applies to the fix itself: take the smallest correct change, not necessarily the bot's suggested diff.
+
+### 5. Show the plan, then stop
+
+```
+## CodeRabbit — PR #16 (7 findings)
+
+### Fixing (2)
+
+**src/rules/loader.ts:41** — 🟠 Major · Functional Correctness
+Empty rule file silently yields an empty ruleset instead of erroring.
+→ throw on empty parse result
+
+**src/cli.ts:88** — 🔴 Critical · Security
+Path from argv joined without normalising; escapes the rules dir.
+→ resolve and assert prefix
+
+### Not fixing (1)
+
+**src/rules/loader.ts:12** — 🟠 Major · Performance
+Claims the regex is recompiled per call; it's module-level const. Bot is wrong.
+
+### Skipped (4)
+
+- src/cli.ts:20 — 🔵 Trivial · below severity threshold
+- src/cli.ts:34 — 🟡 Minor · below severity threshold
+- README.md:8 — 🟡 Minor · below severity threshold
+- src/index.ts:5 — 🟠 Major · already fixed on this branch
+
+7 findings, 2 to fix. Apply?
+```
+
+Wait for approval. Then apply the approved fixes with `Edit`, and report what changed.
+
+## Rules
+
+- **Never post to the PR.** No replies, no resolves, no reactions, no `gh pr comment`. Read-only against GitHub.
+- **The arithmetic must close.** Fixing + not fixing + skipped = findings fetched. Print the total in the heading and re-check it before showing the plan — a finding that appears in no section is exactly the failure this skill exists to prevent.
+- **Skipped is a list, not a count.** One line per skipped finding with its path and reason, even for Trivial.
+- **Verify before believing.** A Major finding still gets read against current code; the bot reviews a snapshot, the branch has moved.
+- **No fixes before approval.** Steps 1–4 change nothing on disk.
+- **Rejections need a concrete reason** — what the bot missed, not "not applicable".
+- **Fix the cause, not the line.** If the same finding pattern hits three files and the bot flagged one, fix all three and say so.
+- **No preamble.** Start with the `## CodeRabbit — PR #N` heading.

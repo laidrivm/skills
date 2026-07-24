@@ -8,6 +8,7 @@ Personal [Claude Code skills](https://code.claude.com/docs/en/skills): each top-
 |---|---|
 | `checklist` | Convert the current plan/review/task list in context into a persistent markdown checklist under `.claude/plans/` |
 | `code-review` | Review staged changes or a specific area, optionally delegating to a chosen agent |
+| `coderabbit` | Chew through CodeRabbit's PR comments: skip Trivial/Minor with a reason, verify Major+ against current code, plan, then apply after approval |
 | `feature-generator` | Expand `spec.md` into a dependency-ordered `features.md`, and keep the two in sync |
 | `first-five` | Scan a diff against the First Five checklist (error handling, input boundaries, external calls, state mutations, assumed dependencies) |
 | `playwright-cli` | Vendored from [microsoft/playwright-cli](https://github.com/microsoft/playwright-cli) — reference for driving a browser via the Playwright CLI; do not edit, see Skill provenance |
