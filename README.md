@@ -20,7 +20,7 @@ Personal [Claude Code skills](https://code.claude.com/docs/en/skills): each top-
 | `warm` | Vet dependencies a branch adds against the WARM check (Worth it, Alive, Right-sized, Maintained securely) plus a supply-chain Safety check (install scripts, typosquatting, release freshness) |
 | `zombies` | Suggest tests worth writing via the ZOMBIES heuristic (Zero, One, Many, Boundaries, Interface, Exceptions, Simple) |
 
-Most are slash-command only (`disable-model-invocation: true`) and take an optional base branch as argument, defaulting to `main`.
+Most take an optional base branch as argument, defaulting to `main`. `triage` and `coderabbit` can also be invoked by the agent on its own; the rest are slash-command only (`disable-model-invocation: true`).
 
 ## Linking
 

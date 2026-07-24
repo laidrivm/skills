@@ -1,8 +1,7 @@
 ---
 name: triage
-description: Triage a branch or diff by grouping changed files into feature areas, assigning each a risk tier (High/Medium/Low), and producing a scannable summary that helps decide where to spend review time. Use when the user asks to "triage" a branch, PR, or diff.
+description: Triage a branch or diff by grouping changed files into feature areas, assigning each a risk tier (High/Medium/Low), and producing a scannable summary that helps decide where to spend review time. Use when the user asks to "triage" a branch, PR, or diff, and as the first step before reviewing a branch or PR that touches more than a couple of files.
 argument-hint: "[branch]"
-disable-model-invocation: true
 allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(git rev-parse:*), Bash(git status:*), Read, Grep, Glob"
 ---
 
