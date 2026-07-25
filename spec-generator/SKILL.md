@@ -1,6 +1,6 @@
 ---
 name: spec-generator
-description: Generate a detailed product specification document from a vague idea, rough description, or supporting materials (UI sketches, screenshots, notes, existing docs). Use this skill whenever the user wants to turn a rough concept into a structured spec — even if they say things like "write up a spec for...", "turn this idea into a requirements doc", "I have this rough idea for a product", "help me spec this out", "create a PRD for...", or uploads images/files and wants a spec written from them. Covers all product types including internal tools. Trigger this skill even if the request seems simple — a vague one-liner idea deserves a proper spec just as much as a detailed brief.
+description: Generate a detailed product specification document from a vague idea, rough description, or supporting materials (UI sketches, screenshots, notes, existing docs). Use this skill whenever the user wants to turn a rough concept into a structured spec — even if they say things like "write up a spec for...", "turn this idea into a requirements doc", "I have this rough idea for a product", "help me spec this out", "create a PRD for...", or uploads images/files and wants a spec written from them. Covers all product types including internal tools. Trigger this skill even if the request seems simple — a vague one-liner idea deserves a proper spec just as much as a detailed brief. Do NOT use this skill in a project that follows the OpenSpec framework — OpenSpec owns spec authoring there; say so and stop.
 ---
 
 # Spec Generator Skill
@@ -29,11 +29,11 @@ Take stock of everything the user has provided:
 - **Uploaded files** — read all of them: notes, existing docs, data models, wireframes, screenshots, mockups
 - **Images** — examine carefully; extract implied features, flows, and constraints
 
-Before drafting, review everything the user has provided and identify any gaps that would meaningfully affect the spec. Always ask about the intended technical stack if it hasn't been provided — this can influence the direction of the project and its features. Ask any other questions that cannot be reasonably inferred from the available inputs — don't ask about things that are already clear or can be decided with a sensible default. Keep the questions concise and grouped in one go, not spread across multiple turns.
+Before drafting, review everything the user has provided and identify any gaps that would meaningfully affect the spec. Always ask about the intended technical stack if it hasn't been provided — this can influence the direction of the project and its features. Ask any other questions that cannot be reasonably inferred from the available inputs — don't ask about things that are already clear or can be decided with a sensible default. Ask them **one at a time** — an answer may invalidate the questions that would have followed.
 
 ### Step 2: Draft the spec
 
-Use the template below. Adapt sections as needed — not every section is required for every spec. Use your judgment. Omit sections that don't apply rather than filling them with placeholder text.
+Use the template below. Omit sections that don't apply rather than filling them with placeholder text — but never add a section that isn't in the template.
 
 ---
 
@@ -109,6 +109,6 @@ Use the template below. Adapt sections as needed — not every section is requir
 
 ## Output Format
 
-Produce the spec as a `.md` file saved to `/mnt/user-data/outputs/spec.md`. Present it to the user using `present_files`.
+Write the spec to `spec.md` in the repository root (or wherever the user asks) using the Write tool. If the file already exists, read it first and confirm with the user before overwriting.
 
-After presenting the file, give a brief summary (1–2 sentences max) noting any significant assumptions you made.
+Then give a brief summary (1–2 sentences max) noting any significant assumptions you made, and the path you wrote to.

@@ -1,6 +1,6 @@
 ---
 name: feature-generator
-description: Generate a detailed features.md document from a spec.md, or sync changes between spec.md and features.md when either file is updated. Use this skill whenever the user wants to expand a product spec into a full feature list, asks to "generate features", "create features.md", "expand the spec", "update features from spec", or "sync spec and features". Also trigger when the user has modified either spec.md or features.md and wants to keep them in sync. Always use this skill when both files are in play together.
+description: Generate a detailed features.md document from a spec.md, or sync changes between spec.md and features.md when either file is updated. Use this skill whenever the user wants to expand a product spec into a full feature list, asks to "generate features", "create features.md", "expand the spec", "update features from spec", or "sync spec and features". Also trigger when the user has modified either spec.md or features.md and wants to keep them in sync. Always use this skill when both files are in play together. Do NOT use this skill in a project that follows the OpenSpec framework — OpenSpec owns spec and change authoring there; say so and stop.
 ---
 
 # Feature Generator Skill
@@ -11,7 +11,7 @@ Expand a `spec.md` into a detailed `features.md`, ordered by the sequence an AI 
 
 ## Step 1: Check for spec.md
 
-Before doing anything, check whether `spec.md` exists in the current context or has been provided by the user.
+Before doing anything, check whether `spec.md` exists in the repository (root, or wherever the user points) or has been provided by the user.
 
 **If spec.md does not exist:**
 Tell the user: "There's no spec.md yet — you'll need to create one first. If you have the spec-generator skill enabled, I can kick that off for you now. Would you like to do that?"
@@ -84,12 +84,12 @@ When the user modifies either `spec.md` or `features.md` and asks to sync:
 - Preserve all other spec content exactly as-is
 - Do not rewrite or reformat untouched sections
 
-Always confirm with the user what changed before syncing, so they can verify the right things are being updated.
+Always confirm with the user what changed before syncing, so they can verify the right things are being updated. When you need more than one thing clarified, ask **one question at a time** — an answer may invalidate the questions that would have followed.
 
 ---
 
 ## Output
 
-Save `features.md` to `/mnt/user-data/outputs/features.md` and present it using `present_files`.
+Write `features.md` next to `spec.md` (repository root by default) using the Write tool. When syncing, edit `spec.md` in place with Edit rather than rewriting it.
 
-If syncing changes to `spec.md`, save the updated version to `/mnt/user-data/outputs/spec.md` and present both files.
+Then list the paths you wrote and summarise what changed in 1–2 sentences.
