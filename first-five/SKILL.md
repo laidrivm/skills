@@ -59,22 +59,22 @@ Use this format exactly:
 
 ```
 **Error Handling**
-- ⚠️ `file.php:42` — empty catch block hides notification failures
-- `file.php:80` — no error handling around the API call
+1. ⚠️ `file.php:42` — empty catch block hides notification failures
+2. `file.php:80` — no error handling around the API call
 
 **Input Boundaries**
-- ⚠️ `Request.php:15` — `message` field has no max length, goes into a text column
+3. ⚠️ `Request.php:15` — `message` field has no max length, goes into a text column
 
 **External Calls**
-- ⚠️ `Controller.php:40` — `Notification::sendLater()` doesn't exist on the facade
+4. ⚠️ `Controller.php:40` — `Notification::sendLater()` doesn't exist on the facade
 
 **State Mutations**
-- `Observer.php:35` — deletes subscription permanently, other features read this relationship
+5. `Observer.php:35` — deletes subscription permanently, other features read this relationship
 
 **Assumed Dependencies**
-- ⚠️ `Controller.php:3` — imports `App\Notifications\IdeaStatusChanged` but file doesn't exist
+6. ⚠️ `Controller.php:3` — imports `App\Notifications\IdeaStatusChanged` but file doesn't exist
 
-**X items across Y files.**
+**6 items across 4 files.**
 ```
 
 If everything is clean, output exactly:
@@ -89,6 +89,7 @@ If everything is clean, output exactly:
 - **⚠️ for high severity only** — data loss, security holes, silent failures, missing files/classes, broken external calls. Plain bullet for everything else.
 - **Always include `file:line`.** Every bullet starts with a backticked path and line number.
 - **One line per finding.** State what's wrong *and* why it matters in the same line. No multi-sentence explanations.
+- **Number findings sequentially across the whole report**, never restarting per section — so the user can say "fix 3 and 7" and mean exactly two things.
 - **Verify Assumed Dependencies before flagging.** Use `find` or `ls`. A false-positive missing-file claim is the worst outcome of this skill.
 - **Skip auto-generated files** (lockfiles, compiled assets, generated route/type definitions).
 - **No preamble, no closing summary** beyond the `**X items across Y files.**` line. No "here's what I found", no advice on how to fix.

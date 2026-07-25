@@ -88,29 +88,29 @@ Ponytail applies to the fix itself: take the smallest correct change, not necess
 
 ### Fixing (3)
 
-**src/rules/loader.ts:41** — 🟠 Major · Functional Correctness
+**1. src/rules/loader.ts:41** — 🟠 Major · Functional Correctness
 Empty rule file silently yields an empty ruleset instead of erroring.
 → throw on empty parse result
 
-**src/cli.ts:88** — 🔴 Critical · Security
+**2. src/cli.ts:88** — 🔴 Critical · Security
 Path from argv joined without normalising; escapes the rules dir.
 → resolve and assert prefix
 
-**src/cli.ts:34** — 🟡 Minor · Functional Correctness
+**3. src/cli.ts:34** — 🟡 Minor · Functional Correctness
 `--limit` parsed with `parseInt`, so `--limit 5x` silently becomes 5.
 → correct and one line; `Number()` + isFinite check
 
 ### Not fixing (1)
 
-**src/rules/loader.ts:12** — 🟠 Major · Performance
+**4. src/rules/loader.ts:12** — 🟠 Major · Performance
 Claims the regex is recompiled per call; it's module-level const. Bot is wrong.
 
 ### Skipped (3)
 
-- src/cli.ts:20 — 🔵 Trivial · Trivial, skipped by default
-- README.md:8 — 🟡 Minor · read it: wants the options table alphabetised, the
-  order is grouped by workflow on purpose
-- src/index.ts:5 — 🟠 Major · already fixed on this branch
+5. src/cli.ts:20 — 🔵 Trivial · Trivial, skipped by default
+6. README.md:8 — 🟡 Minor · read it: wants the options table alphabetised, the
+   order is grouped by workflow on purpose
+7. src/index.ts:5 — 🟠 Major · already fixed on this branch
 
 7 findings, 3 to fix. Apply?
 CODERABBIT gate: OPEN — 7 findings, 3 fixes awaiting approval.
@@ -133,6 +133,7 @@ It exists so a driving agent, PR template or hook can check the step ran and clo
 - **Never post to the PR.** No replies, no resolves, no reactions, no `gh pr comment`. Read-only against GitHub.
 - **The arithmetic must close.** Fixing + not fixing + skipped = findings fetched. Print the total in the heading and re-check it before showing the plan — a finding that appears in no section is exactly the failure this skill exists to prevent.
 - **Skipped is a list, not a count.** One line per skipped finding with its path and reason, even for Trivial.
+- **Number every finding sequentially across the whole report** — Fixing, then Not fixing, then Skipped, never restarting per section. The last number equals the total in the heading, and "apply 3 and 7" means exactly two findings. Keep the same numbers when you report what changed after approval.
 - **Severity budgets attention, not belief.** A Minor is skipped because you
   read it and judged the change not worth making, never because of its label.
 - **Verify before believing.** A Major finding still gets read against current code; the bot reviews a snapshot, the branch has moved.

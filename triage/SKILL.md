@@ -70,25 +70,25 @@ Use this exact format:
 ```
 ### ⚠️ High Risk
 
-**[Feature Area Name]** (+240/−12, 6 files)
+**1. [Feature Area Name]** (+240/−12, 6 files)
 Reason: [one sentence explaining why this is high risk]
 - path/to/file.php (added/modified)
 - path/to/other-file.php (modified)
 
-**[Another Feature Area]** (+35/−4, 2 files)
+**2. [Another Feature Area]** (+35/−4, 2 files)
 Reason: [one sentence]
 - path/to/file.php (added)
 
 ### Medium Risk
 
-**[Feature Area Name]** (+80/−20, 3 files)
+**3. [Feature Area Name]** (+80/−20, 3 files)
 Reason: [one sentence]
 - path/to/file.php (added)
 - path/to/new-name.php (renamed from path/to/old-name.php)
 
 ### Low Risk
 
-**[Feature Area Name]** (+6/−2, 1 file)
+**4. [Feature Area Name]** (+6/−2, 1 file)
 - path/to/file.php (modified)
 
 ### Skip
@@ -108,6 +108,7 @@ Triage produces no findings, so it can never reach PASS on a diff that has High 
 - **Group by feature area, not by file type.** "Auth flow" not "Controllers". "Notification delivery" not "PHP files".
 - **One group per file.** Pick the most relevant one.
 - **Group names: 2–4 words.** Short and descriptive.
+- **Number the groups sequentially across the whole map**, highest risk first, never restarting per tier — so "review 1 and 3" picks out exactly two groups. The Skip section isn't numbered; it's a counter, not a target.
 - **One-line reason per group** explaining WHY it's that risk level. Only required for High and Medium tiers — Low can skip the reason.
 - **Size suffix on each group**: `(+added/−deleted, N files)`, summed from `git diff --stat` — this is what lets the user budget review time.
 - **Status suffix on each file**: `(added)`, `(modified)`, `(deleted)`, `(renamed from old/path)`, or `(copied from old/path)`. Match `git diff --name-status` (statuses `A`/`M`/`D`/`R*`/`C*`).

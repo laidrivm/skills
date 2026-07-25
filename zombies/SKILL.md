@@ -92,22 +92,22 @@ In each feature heading, name the test file the ideas belong in — the existing
 ## 🧟 [Feature Area] (tests/Feature/SignInCodeTest.php)
 
 **Boundaries**
-- Email field rejects values longer than 255 chars (matches migration column)
-- Sign-in code expires exactly at the 15-minute mark
+1. Email field rejects values longer than 255 chars (matches migration column)
+2. Sign-in code expires exactly at the 15-minute mark
 
 **Interface**
-- Error for an expired code carries code "code_expired", not only a message string
-- `expiresAt` is returned as ISO 8601 with offset
+3. Error for an expired code carries code "code_expired", not only a message string
+4. `expiresAt` is returned as ISO 8601 with offset
 
 **Exceptions**
-- Expired code returns a validation error
-- Already-used code cannot be redeemed twice
-- Submitting code for an unknown email fails silently (no user enumeration)
+5. Expired code returns a validation error
+6. Already-used code cannot be redeemed twice
+7. Submitting code for an unknown email fails silently (no user enumeration)
 
 **Simple**
-- Requesting a code emails the user and creates a `SignInCode` row
-- User signs in end-to-end: request code → follow email → land authenticated (e2e candidate)
-- [partial] valid code logs the user in — existing test asserts the redirect but never asserts the code is consumed
+8. Requesting a code emails the user and creates a `SignInCode` row
+9. User signs in end-to-end: request code → follow email → land authenticated (e2e candidate)
+10. [partial] valid code logs the user in — existing test asserts the redirect but never asserts the code is consumed
 ```
 
 The `🧟` prefix and `##` level are what make a feature heading stand out from the bold `**Letter**` sub-headings — keep both. If multiple features are in scope, repeat the block per feature, separating each with a `---` horizontal rule so the boundaries between features are obvious.
@@ -139,6 +139,7 @@ ZOMBIES gate: PASS — no gaps.
 - **One heading per letter, per feature area.** Each ZOMBIES letter appears at most once within a feature area — collect all of that letter's bullets under its single heading. Never repeat a letter's heading.
 - **Be specific.** Reference actual lengths, timings, statuses, route names from the code. Generic suggestions are worthless.
 - **One behaviour per bullet.** No "and" joining two tests.
+- **Number the ideas sequentially across the whole report**, never restarting per letter or per feature — so "write 3 and 7" picks out exactly two tests. The numbers in the gate line count the same items.
 - **No implementation hints.** Don't suggest assertions, factories, or test setup — just what to verify.
 - **Group by feature first, then by letter.** Don't dump everything under one giant ZOMBIES list when the diff spans multiple features.
 - **No preamble.** No "Here are the tests I'd suggest…". Start with the first `## [Feature Area]` heading.

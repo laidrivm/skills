@@ -60,24 +60,24 @@ Ponytail applies to the fix itself: take the smallest correct change, not necess
 
 ### Fixing (2)
 
-**src/cli.ts:34** — 🟡 Minor · Functional Correctness
+**1. src/cli.ts:34** — 🟡 Minor · Functional Correctness
 `--limit` parsed with `parseInt`, so `--limit 5x` silently becomes 5.
 → `Number()` + isFinite check
 
-**src/rules/loader.ts:41** — 🟠 Major · Functional Correctness
+**2. src/rules/loader.ts:41** — 🟠 Major · Functional Correctness
 Empty rule file silently yields an empty ruleset instead of erroring.
 → throw on empty parse result
 
 ### Not fixing (1)
 
-**src/rules/loader.ts:12** — 🟠 Major · Performance
+**3. src/rules/loader.ts:12** — 🟠 Major · Performance
 Claims the regex is recompiled per call; it's module-level const. Bot is wrong.
 
 ### Skipped (2)
 
-- src/cli.ts:20 — 🔵 Trivial · Trivial, skipped by default
-- README.md:8 — 🟡 Minor · read it: wants the options table alphabetised, the
-  order is grouped by workflow on purpose
+4. src/cli.ts:20 — 🔵 Trivial · Trivial, skipped by default
+5. README.md:8 — 🟡 Minor · read it: wants the options table alphabetised, the
+   order is grouped by workflow on purpose
 
 5 findings, 2 to fix. Apply?
 CODERABBIT gate: OPEN — 5 findings, 2 fixes awaiting approval.
@@ -103,6 +103,7 @@ It exists so a driving agent, PR template or hook can check the step ran and clo
 - **`cr doctor` first, every time.** A failed check stops the skill; don't attempt the review anyway.
 - **The arithmetic must close.** Fixing + not fixing + skipped = findings reported. Print the total in the heading and re-check it before showing the plan.
 - **Skipped is a list, not a count.** One line per skipped finding with its path and reason, even for Trivial.
+- **Number every finding sequentially across the whole report** — Fixing, then Not fixing, then Skipped, never restarting per section. The last number equals the total in the heading, and "apply 3 and 7" means exactly two findings. Keep the same numbers when you report what changed after approval.
 - **Severity budgets attention, not belief.** A Minor is skipped because you read it and judged the change not worth making, never because of its label.
 - **No fixes before approval.** Steps 1–3 change nothing on disk.
 - **Rejections need a concrete reason** — what the bot missed, not "not applicable".
