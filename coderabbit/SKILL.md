@@ -113,9 +113,20 @@ Claims the regex is recompiled per call; it's module-level const. Bot is wrong.
 - src/index.ts:5 — 🟠 Major · already fixed on this branch
 
 7 findings, 3 to fix. Apply?
+CODERABBIT gate: OPEN — 7 findings, 3 fixes awaiting approval.
 ```
 
 Wait for approval. Then apply the approved fixes with `Edit`, and report what changed.
+
+### 6. Gate line
+
+Every output ends with a machine-readable last line, exactly one of:
+
+- `CODERABBIT gate: PASS — N findings, N dispositioned.` (every finding fixed, skipped or rejected — nothing left to do)
+- `CODERABBIT gate: OPEN — N findings, M fixes awaiting approval.` (the plan in step 5, before the user answers)
+- `CODERABBIT gate: BLOCKED — N findings, M undispositioned.` (the arithmetic didn't close, or the user declined a fix that is still a real defect — name them)
+
+It exists so a driving agent, PR template or hook can check the step ran and closed without re-parsing the report.
 
 ## Rules
 
@@ -129,3 +140,4 @@ Wait for approval. Then apply the approved fixes with `Edit`, and report what ch
 - **Rejections need a concrete reason** — what the bot missed, not "not applicable".
 - **Fix the cause, not the line.** If the same finding pattern hits three files and the bot flagged one, fix all three and say so.
 - **No preamble.** Start with the `## CodeRabbit — PR #N` heading.
+- **Always end with the gate line.** It's the step's result and the only line the driving agent needs.

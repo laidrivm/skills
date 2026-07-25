@@ -114,10 +114,18 @@ The `🧟` prefix and `##` level are what make a feature heading stand out from 
 
 End with a one-line summary: `X test ideas (Y e2e candidates).` — omit the parenthesis when there are none.
 
+Then the gate line, exactly one of:
+
+- `ZOMBIES gate: PASS — no gaps.`
+- `ZOMBIES gate: OPEN — N gaps unaddressed.` (N = test ideas listed, including `[partial]` and `[verify coverage]` ones)
+
+This skill only ever finds gaps — it never closes them, so any gap leaves the gate `OPEN`. Whoever acts on the report closes it: after writing the tests, or deciding with a stated reason not to, they re-emit the line as `PASS — N gaps dispositioned.` — or `BLOCKED — <what needs the user>` if a gap can't be settled without them. The last gate line of the turn is the one that counts.
+
 If there's nothing worth testing (e.g. trivial rename, pure config change), output exactly:
 
 ```
 ✅ Nothing worth writing tests for.
+ZOMBIES gate: PASS — no gaps.
 ```
 
 ## Rules
@@ -135,3 +143,4 @@ If there's nothing worth testing (e.g. trivial rename, pure config change), outp
 - **Group by feature first, then by letter.** Don't dump everything under one giant ZOMBIES list when the diff spans multiple features.
 - **No preamble.** No "Here are the tests I'd suggest…". Start with the first `## [Feature Area]` heading.
 - **No closing advice** beyond the summary line.
+- **Always end with the gate line** — including the nothing-to-test case. It's the machine-readable result a driving agent, PR template or hook reads without re-parsing the report.

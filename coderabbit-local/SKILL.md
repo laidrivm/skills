@@ -80,9 +80,23 @@ Claims the regex is recompiled per call; it's module-level const. Bot is wrong.
   order is grouped by workflow on purpose
 
 5 findings, 2 to fix. Apply?
+CODERABBIT gate: OPEN — 5 findings, 2 fixes awaiting approval.
 ```
 
 Wait for approval. Then apply the approved fixes with `Edit`, and report what changed.
+
+### 5. Gate line
+
+Every output ends with a machine-readable last line, exactly one of:
+
+- `CODERABBIT gate: PASS — N findings, N dispositioned.` (every finding fixed, skipped or rejected)
+- `CODERABBIT gate: PASS — no findings.`
+- `CODERABBIT gate: PASS — no changes on this branch.` (step 1 found nothing to review)
+- `CODERABBIT gate: OPEN — N findings, M fixes awaiting approval.` (the plan in step 4, before the user answers)
+- `CODERABBIT gate: BLOCKED — N findings, M undispositioned.` (the arithmetic didn't close, or a real defect was declined — name them)
+- `CODERABBIT gate: BLOCKED — cr doctor failed: <check>.` (step 1 stopped the run; no review happened)
+
+It exists so a driving agent, PR template or hook can check the step ran and closed without re-parsing the report.
 
 ## Rules
 
@@ -95,3 +109,4 @@ Wait for approval. Then apply the approved fixes with `Edit`, and report what ch
 - **Fix the cause, not the line.** If the same finding pattern hits three files and the bot flagged one, fix all three and say so.
 - **Read-only against git.** No commits, no stashing, no branch switching — review what is on disk now.
 - **No preamble.** Start with the `## CodeRabbit — <branch> vs <base>` heading.
+- **Always end with the gate line** — including when `cr doctor` stops the run or the branch is empty.

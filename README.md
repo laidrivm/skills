@@ -23,6 +23,16 @@ Personal [Claude Code skills](https://code.claude.com/docs/en/skills): each top-
 
 `triage`, `warm`, `zombies`, `preflight`, `coderabbit-local`, `spec-generator`, `feature-generator` and `playwright-cli` can be invoked by the agent on its own; the rest carry `disable-model-invocation: true` and answer only to `/name`. The diff-based skills (`triage`, `warm`, `zombies`, `first-five`, `review-order`, `preflight`, `coderabbit-local`) take an optional base branch, detected from `origin/HEAD` and falling back to `main`.
 
+## Gate lines
+
+`warm`, `zombies`, `triage`, `coderabbit` and `coderabbit-local` end their output with a machine-readable last line — `WARM gate: PASS — 3 dependencies vetted.`, `ZOMBIES gate: BLOCKED — 3 gaps unaddressed.`, `TRIAGE gate: OPEN — 4 groups, 2 high-risk — High/Medium unread.`, `CODERABBIT gate: PASS — 7 findings, 7 dispositioned.` A driving agent reads the outcome without re-parsing the report, and a PR template or pre-push hook can require the lines to be present and `PASS`. The three states mean:
+
+- **PASS** — nothing to act on, or everything dispositioned with a stated reason.
+- **OPEN** — findings exist, nobody has dispositioned them yet. Transient: it must not survive the turn. `triage` and `zombies` can only ever emit `OPEN`, because by design they decide nothing themselves.
+- **BLOCKED** — the agent may not proceed alone: a `warm` Hold, a failed `cr doctor`, a real defect the user declined to fix.
+
+Whoever acts on a report re-emits its gate line after acting. **The last gate line of the turn is the one that counts** — that's what makes "the report alone is never the deliverable" mechanically checkable instead of a rule in prose.
+
 ## Linking
 
 `link.sh` symlinks a skill into a project's `.claude/skills/` (relative links, so they survive in git) or into `~/.claude/skills` for global use.

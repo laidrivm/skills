@@ -96,7 +96,12 @@ Reason: [one sentence]
 **Auto-generated** — 4 files (lockfile, compiled assets) — skip
 ```
 
-End with a one-line summary: `X groups, Y high-risk files to focus on`.
+End with a one-line summary: `X groups, Y high-risk files to focus on`, then the gate line, exactly one of:
+
+- `TRIAGE gate: PASS — N groups, nothing above Low risk.`
+- `TRIAGE gate: OPEN — N groups, M high-risk — High/Medium unread.`
+
+Triage produces no findings, so it can never reach PASS on a diff that has High or Medium groups — it hands over an `OPEN` gate that only reading those groups closes. Whoever acts on the map re-emits the line as `PASS — M high-risk groups reviewed.`, or `BLOCKED — <what needs the user>`. The last gate line of the turn is the one that counts, and it's the artefact a PR template or hook can require — the reason "the report alone is never the deliverable" is checkable at all.
 
 ## Rules
 
@@ -112,4 +117,4 @@ End with a one-line summary: `X groups, Y high-risk files to focus on`.
 - **If everything fits in one tier**, say so and suggest reviewing everything: "This diff is small — review all files".
 - **No suggestions, no advice.** This is a triage map, not a review. Don't say "verify…", "consider…", "make sure…".
 - **No emojis** other than the ⚠️ on the High Risk heading.
-- **End with a one-line summary**: `X groups, Y high-risk files to focus on`.
+- **End with a one-line summary**: `X groups, Y high-risk files to focus on`, followed by the gate line as the very last line.
