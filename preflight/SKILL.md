@@ -1,15 +1,22 @@
 ---
 name: preflight
-description: Reads the diff between the current branch and main and produces a production pre-flight checklist of everything that must be done or configured once the change merges. Use before merging or deploying a branch.
+description: Reads the diff between the current branch and its base branch and produces a production pre-flight checklist of everything that must be done or configured once the change merges. Use before merging or deploying a branch.
+argument-hint: "[branch]"
 ---
 
 # Preflight
 
 Produce a production pre-flight checklist for the current branch.
 
+## Arguments
+
+Raw arguments: $ARGUMENTS
+
+Parse the arguments as the **base branch** to diff against. If empty, detect the default branch with `git rev-parse --abbrev-ref origin/HEAD` (strip the `origin/` prefix); if that fails, fall back to `main`.
+
 ## Steps
 
-1. Get the diff against the base branch: `git diff main...HEAD`.
+1. Get the diff against the base branch: `git diff <base>...HEAD`.
 2. Read every changed hunk. Look for things that need action in production once
    this merges — for example:
    - new environment variables / config keys

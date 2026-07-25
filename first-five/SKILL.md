@@ -12,7 +12,7 @@ allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(
 
 Raw arguments: $ARGUMENTS
 
-Parse the arguments as the **base branch** to diff against. If empty, default to `main`.
+Parse the arguments as the **base branch** to diff against. If empty, detect the default branch with `git rev-parse --abbrev-ref origin/HEAD` (strip the `origin/` prefix); if that fails, fall back to `main`.
 
 ## Goal
 
