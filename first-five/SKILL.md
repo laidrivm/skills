@@ -35,9 +35,9 @@ Run `git diff <base>...HEAD` (three-dot — changes on this branch since it dive
 ### 2. Scan changed files
 
 For every changed file, read enough to evaluate it against the five checks. Skip auto-generated files unless something looks unexpected:
-- Lockfiles (`composer.lock`, `package-lock.json`, `pnpm-lock.yaml`, etc.)
-- Compiled assets (`public/build/`, `dist/`)
-- Generated route/type definitions (e.g. Wayfinder action/route files, generated TS types)
+- Lockfiles: `composer.lock`, `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lockb`, `Cargo.lock`, `go.sum`, `poetry.lock`, `Gemfile.lock`
+- Compiled assets: `public/build/`, `dist/`, `build/`
+- Generated route/type definitions: Wayfinder action/route files, generated TS types, `*.generated.*`
 
 ### 3. Verify before flagging
 

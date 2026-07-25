@@ -61,7 +61,10 @@ Otherwise: pick the tier that matches the blast radius of the change.
 
 ### 5. Identify auto-generated files
 
-Auto-generated files go in a "Skip" section at the bottom. The shared list of auto-generated patterns lives in `../_shared/generated-files.md` (relative to this SKILL.md) — read it. If that file is unavailable, fall back to: lockfiles, compiled assets, generated route/type definitions.
+Auto-generated files go in a "Skip" section at the bottom:
+- Lockfiles: `composer.lock`, `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lockb`, `Cargo.lock`, `go.sum`, `poetry.lock`, `Gemfile.lock`
+- Compiled assets: `public/build/`, `dist/`, `build/`
+- Generated route/type definitions: Wayfinder action/route files, generated TS types, `*.generated.*`
 
 ### 6. Output the report
 

@@ -46,9 +46,9 @@ Run `git diff <base>...HEAD` (three-dot — i.e. changes on this branch since it
 For every changed file, read enough of the file (and surrounding files only when needed to understand a data flow) to categorise it.
 
 Skip auto-generated files unless they contain something unexpected:
-- Lockfiles (`composer.lock`, `package-lock.json`, `pnpm-lock.yaml`, etc.)
-- Compiled assets (`public/build/`, `dist/`)
-- Generated route/type definitions (e.g. Wayfinder action/route files, generated TS types)
+- Lockfiles: `composer.lock`, `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lockb`, `Cargo.lock`, `go.sum`, `poetry.lock`, `Gemfile.lock`
+- Compiled assets: `public/build/`, `dist/`, `build/`
+- Generated route/type definitions: Wayfinder action/route files, generated TS types, `*.generated.*`
 
 ### 3. Identify the feature changes
 

@@ -63,7 +63,10 @@ Each suggestion belongs to a test layer:
 ### 1. Locate the feature
 
 - **With args**: search the codebase with `Grep`/`Glob` for files matching the description. Read the implementation files (controllers, models, actions, validators) and the existing test file if one exists.
-- **Without a description**: run `git diff --name-status <base>...HEAD` and `git diff <base>...HEAD`, then read the changed implementation files. Skip auto-generated files — the shared list of patterns lives in `../_shared/generated-files.md` (relative to this SKILL.md); if unavailable, fall back to lockfiles, compiled assets, generated route/type definitions.
+- **Without a description**: run `git diff --name-status <base>...HEAD` and `git diff <base>...HEAD`, then read the changed implementation files. Skip auto-generated files:
+  - Lockfiles: `composer.lock`, `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lockb`, `Cargo.lock`, `go.sum`, `poetry.lock`, `Gemfile.lock`
+  - Compiled assets: `public/build/`, `dist/`, `build/`
+  - Generated route/type definitions: Wayfinder action/route files, generated TS types, `*.generated.*`
 
 ### 2. Generate ZOMBIES suggestions
 
