@@ -23,6 +23,10 @@ Personal [Claude Code skills](https://code.claude.com/docs/en/skills): each top-
 
 `triage`, `warm`, `zombies`, `preflight`, `coderabbit-local`, `spec-generator`, `feature-generator` and `playwright-cli` can be invoked by the agent on its own; the rest carry `disable-model-invocation: true` and answer only to `/name`. The diff-based skills (`triage`, `warm`, `zombies`, `first-five`, `review-order`, `preflight`, `coderabbit-local`) take an optional base branch, detected from `origin/HEAD` and falling back to `main`.
 
+## Severity
+
+One vocabulary everywhere: `🔴 Critical` > `🟠 Major` > `🟡 Minor` > `🔵 Trivial` — CodeRabbit's ladder, adopted because that one arrives from outside and can't be changed. `code-review` used to have its own five levels (Error/Warning/Suggestion/Nitpick); it doesn't any more. `triage` is the exception on purpose: its High/Medium/Low are risk tiers for budgeting attention, not severities of findings.
+
 ## Gate lines
 
 `warm`, `zombies`, `triage`, `coderabbit` and `coderabbit-local` end their output with a machine-readable last line — `WARM gate: PASS — 3 dependencies vetted.`, `ZOMBIES gate: BLOCKED — 3 gaps unaddressed.`, `TRIAGE gate: OPEN — 4 groups, 2 high-risk — High/Medium unread.`, `CODERABBIT gate: PASS — 7 findings, 7 dispositioned.` A driving agent reads the outcome without re-parsing the report, and a PR template or pre-push hook can require the lines to be present and `PASS`. The three states mean:

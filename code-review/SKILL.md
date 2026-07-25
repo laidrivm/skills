@@ -45,15 +45,18 @@ Read surrounding source files as needed to understand context. Organize findings
 
 ### Severity levels
 
-1. **🔴 Critical** — Bugs, security vulnerabilities, data loss risks, or crashes. Must be fixed.
-2. **🟠 Error** — Logic errors, missing error handling, broken edge cases. Very likely to cause problems.
-3. **🟡 Warning** — Code smells, performance concerns, potential edge cases, maintainability issues.
-4. **🔵 Suggestion** — Better approaches, readability improvements, idiomatic alternatives.
-5. **⚪ Nitpick** — Style, naming, formatting, minor preferences. Totally optional.
+The same four levels CodeRabbit uses, high to low — one vocabulary across every review skill here, so a finding keeps its label whether it came from the bot or from this review:
+
+1. **🔴 Critical** — Security vulnerabilities, data loss risks, crashes. Must be fixed.
+2. **🟠 Major** — Logic errors, missing error handling, broken edge cases. Very likely to cause problems.
+3. **🟡 Minor** — Code smells, performance concerns, maintainability issues, better approaches, readability. Worth reading and deciding on.
+4. **🔵 Trivial** — Style, naming, formatting, preferences. Totally optional.
+
+Don't invent levels outside this ladder — no `Error`, `Warning`, `Suggestion` or `Nitpick`.
 
 ### Output format
 
-Group findings by severity. Each severity level that has findings should be its own heading (e.g. `## 🔴 Critical`, `## 🟠 Error`, etc.). Within each severity heading, list the findings. For each finding, include:
+Group findings by severity. Each severity level that has findings should be its own heading (e.g. `## 🔴 Critical`, `## 🟠 Major`, etc.). Number the findings sequentially across the whole report, never restarting per heading, so "fix 3 and 7" means exactly two findings. For each finding, include:
 - The file and line reference
 - A concise description of the issue
 - A suggested fix or alternative (when applicable)
