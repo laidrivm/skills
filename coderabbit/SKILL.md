@@ -12,7 +12,7 @@ allowed-tools: "Bash(gh api:*), Bash(gh pr view:*), Bash(gh pr list:*), Bash(git
 Raw arguments: $ARGUMENTS
 
 - A number → that PR. If absent, resolve the PR for the current branch with `gh pr view --json number,headRepositoryOwner,headRepository,url`. If there is no PR, say so and stop.
-- `--all` → also fix 🔵 Trivial and 🟡 Minor instead of skipping them.
+- `--all` → give 🔵 Trivial the same reading 🟡 Minor gets.
 
 Get `OWNER/REPO` from `gh repo view --json nameWithOwner` unless the argument carries its own.
 
@@ -54,8 +54,20 @@ Also pull out of the body, when present:
 
 ### 3. Sort
 
-- 🔵 Trivial, 🟡 Minor → **skipped**, one line each with the reason (`below severity threshold`). No verification, no reading files. With `--all`, treat them as Major instead.
-- 🟠 Major, 🔴 Critical → **verify** each one.
+Severity budgets how much scrutiny a finding earns — it never decides whether
+the finding is right. A correct, cheap Minor gets fixed; a wrong Major gets
+rejected.
+
+- 🔵 Trivial → **skipped** by default, one line each with the reason. No
+  verification, no reading files.
+- 🟡 Minor → **read it, then decide.** Skip when it is taste, when the project
+  has a settled convention the bot does not know, or when the fix costs more
+  than the defect is worth. Fix when it is correct and the change is small and
+  self-contained — "it is only Minor" is not a reason to leave a real defect in
+  the branch. Report which you chose and why; `below severity threshold` is not
+  a reason on its own.
+- 🟠 Major, 🔴 Critical → **verify** each one against current code.
+- `--all` → give 🔵 Trivial the same reading 🟡 Minor gets.
 
 ### 4. Verify each Major+ against the current code
 
@@ -73,7 +85,7 @@ Ponytail applies to the fix itself: take the smallest correct change, not necess
 ```
 ## CodeRabbit — PR #16 (7 findings)
 
-### Fixing (2)
+### Fixing (3)
 
 **src/rules/loader.ts:41** — 🟠 Major · Functional Correctness
 Empty rule file silently yields an empty ruleset instead of erroring.
@@ -83,19 +95,23 @@ Empty rule file silently yields an empty ruleset instead of erroring.
 Path from argv joined without normalising; escapes the rules dir.
 → resolve and assert prefix
 
+**src/cli.ts:34** — 🟡 Minor · Functional Correctness
+`--limit` parsed with `parseInt`, so `--limit 5x` silently becomes 5.
+→ correct and one line; `Number()` + isFinite check
+
 ### Not fixing (1)
 
 **src/rules/loader.ts:12** — 🟠 Major · Performance
 Claims the regex is recompiled per call; it's module-level const. Bot is wrong.
 
-### Skipped (4)
+### Skipped (3)
 
-- src/cli.ts:20 — 🔵 Trivial · below severity threshold
-- src/cli.ts:34 — 🟡 Minor · below severity threshold
-- README.md:8 — 🟡 Minor · below severity threshold
+- src/cli.ts:20 — 🔵 Trivial · Trivial, skipped by default
+- README.md:8 — 🟡 Minor · read it: wants the options table alphabetised, the
+  order is grouped by workflow on purpose
 - src/index.ts:5 — 🟠 Major · already fixed on this branch
 
-7 findings, 2 to fix. Apply?
+7 findings, 3 to fix. Apply?
 ```
 
 Wait for approval. Then apply the approved fixes with `Edit`, and report what changed.
@@ -105,6 +121,8 @@ Wait for approval. Then apply the approved fixes with `Edit`, and report what ch
 - **Never post to the PR.** No replies, no resolves, no reactions, no `gh pr comment`. Read-only against GitHub.
 - **The arithmetic must close.** Fixing + not fixing + skipped = findings fetched. Print the total in the heading and re-check it before showing the plan — a finding that appears in no section is exactly the failure this skill exists to prevent.
 - **Skipped is a list, not a count.** One line per skipped finding with its path and reason, even for Trivial.
+- **Severity budgets attention, not belief.** A Minor is skipped because you
+  read it and judged the change not worth making, never because of its label.
 - **Verify before believing.** A Major finding still gets read against current code; the bot reviews a snapshot, the branch has moved.
 - **No fixes before approval.** Steps 1–4 change nothing on disk.
 - **Rejections need a concrete reason** — what the bot missed, not "not applicable".
