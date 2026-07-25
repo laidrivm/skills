@@ -3,7 +3,7 @@ name: code-review
 description: Code review staged changes or a specific area of the codebase, optionally delegating to a chosen agent. Use when the user wants a code review.
 argument-hint: "[agent] [feature]"
 disable-model-invocation: true
-allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash, Read, Grep, Glob, Agent"
+allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(codex:*), Bash(aider:*), Bash(goose:*), Read, Write, Grep, Glob, Agent"
 ---
 
 # Code Review
@@ -24,12 +24,12 @@ Raw arguments: $ARGUMENTS
 
 Parse the arguments as follows:
 
-- **Agent** (optional, first argument): The CLI command or agent name to delegate the review to. Recognized values:
-  - `claude` or `self` or empty — perform the review directly in this context (default)
-  - Any other value — treated as a CLI command name (e.g. `codex`, `aider`, `goose`). The review will be delegated by invoking that command via Bash (see Delegation section).
+- **Agent** (optional, first argument): must be one of exactly these literals — `claude`, `self`, `codex`, `aider`, `goose`. Anything else is not an agent.
+  - `claude` / `self` / empty — perform the review directly in this context (default)
+  - `codex` / `aider` / `goose` — delegate via Bash (see Delegation section)
 - **Feature** (optional, remaining arguments after agent): A description of what part of the codebase to review (e.g. "voting functionality", "authentication", "API endpoints"). When provided, find and review all files related to this feature. When empty/omitted, review staged changes instead.
 
-If only one argument is given and it does NOT match a known agent name (`claude`, `self`), treat it as the **feature** instead, with agent defaulting to `claude`.
+If the first argument is not one of those five literals, treat the whole of `$ARGUMENTS` as the **feature**, with agent defaulting to `claude`. Never derive a command name from `$ARGUMENTS`.
 
 ## Instructions
 
@@ -64,7 +64,7 @@ End with a `## Summary` section: overall assessment, whether changes look good t
 
 ### Delegation
 
-If the agent is not `claude`/`self`/empty, it is treated as a CLI command name. Delegate the review by invoking that command via Bash:
-- Build a prompt that includes the review instructions, severity levels, output format, and either the staged diff or the feature description
-- Run: `<agent> -q "<prompt>"` where `<agent>` is the CLI command the user specified (e.g. `codex`, `aider`, `goose`)
+Only for agent `codex`, `aider`, or `goose`:
+- Write the prompt (review instructions, severity levels, output format, and the staged diff or feature description) to a file in the scratchpad directory using Write — never inline user text into the command line
+- Run exactly one of: `codex -q "$(cat <prompt-file>)"`, `aider -q "$(cat <prompt-file>)"`, `goose -q "$(cat <prompt-file>)"`
 - When the command returns, relay its findings to the user verbatim
