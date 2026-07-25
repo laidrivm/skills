@@ -1,8 +1,8 @@
 ---
 name: coderabbit-local
-description: Run CodeRabbit locally with the `cr` CLI against the changes this branch made since it diverged from its base — no PR needed — then triage the findings the same way the `coderabbit` skill triages PR comments. Use when the user wants a CodeRabbit review before pushing or opening a PR, asks to "run coderabbit", "cr review", or wants the bot's take on the current branch.
+description: Run CodeRabbit locally with the `coderabbit` CLI against the changes this branch made since it diverged from its base — no PR needed — then triage the findings the same way the `coderabbit` skill triages PR comments. Use when the user wants a CodeRabbit review before pushing or opening a PR, asks to "run coderabbit", "coderabbit review", or wants the bot's take on the current branch.
 argument-hint: "[base branch] [--all]"
-allowed-tools: "Bash(cr doctor:*), Bash(cr review:*), Bash(git diff:*), Bash(git log:*), Bash(git rev-parse:*), Bash(git status:*), Read, Edit, Grep, Glob"
+allowed-tools: "Bash(coderabbit doctor:*), Bash(coderabbit review:*), Bash(git diff:*), Bash(git log:*), Bash(git rev-parse:*), Bash(git status:*), Read, Edit, Grep, Glob"
 ---
 
 # CodeRabbit (local CLI)
@@ -18,27 +18,27 @@ Raw arguments: $ARGUMENTS
 
 ## Instructions
 
-### 1. Preflight with `cr doctor`
+### 1. Preflight with `coderabbit doctor`
 
 ```bash
-cr doctor
+coderabbit doctor
 ```
 
 It checks the CLI version, storage, auth state, git repository and backend/WebSocket connectivity, and **exits 1 on any failure**. A review takes minutes; this takes seconds — always run it first and stop on a non-zero exit rather than discovering stale auth at the end.
 
-On failure, report which check failed and what fixes it — `cr auth login` for auth, a network/VPN issue for connectivity, [the install docs](https://docs.coderabbit.ai/cli/overview) if `cr` is missing. **Do not install it yourself**, and never pipe an install script into a shell.
+On failure, report which check failed and what fixes it — `coderabbit auth login` for auth, a network/VPN issue for connectivity, [the install docs](https://docs.coderabbit.ai/cli/overview) if `coderabbit` is missing. **Do not install it yourself**, and never pipe an install script into a shell.
 
 Then confirm there is something to review: `git diff --stat <base>...HEAD`. If the branch is empty relative to `<base>`, say so and stop.
 
 ### 2. Review
 
 ```bash
-cr review --base <base> --plain
+coderabbit review --base <base> --agent --config .coderabbit.yaml CLAUDE.md
 ```
 
 This reviews the branch's tracked changes (committed, staged and unstaged) against `<base>`. It commonly takes several minutes — give the call a generous timeout and don't rerun it because it seems slow. Add `--include-untracked` when new files aren't staged yet, and `--light` only if the user asks for a faster, shallower pass.
 
-If the plain output is hard to attribute to files and severities, rerun with `--agent` for structured JSON rather than guessing.
+`--agent` gives structured findings instead of prose — the CLI itself recommends it under Claude. `--config` takes the files the CLI does *not* pick up on its own; drop from the list whichever doesn't exist in the repo, and add other convention files (`AGENTS.md`, `.cursorrules`) when they do.
 
 ### 3. Sort by severity
 
@@ -94,13 +94,13 @@ Every output ends with a machine-readable last line, exactly one of:
 - `CODERABBIT gate: PASS — no changes on this branch.` (step 1 found nothing to review)
 - `CODERABBIT gate: OPEN — N findings, M fixes awaiting approval.` (the plan in step 4, before the user answers)
 - `CODERABBIT gate: BLOCKED — N findings, M undispositioned.` (the arithmetic didn't close, or a real defect was declined — name them)
-- `CODERABBIT gate: BLOCKED — cr doctor failed: <check>.` (step 1 stopped the run; no review happened)
+- `CODERABBIT gate: BLOCKED — coderabbit doctor failed: <check>.` (step 1 stopped the run; no review happened)
 
 It exists so a driving agent, PR template or hook can check the step ran and closed without re-parsing the report.
 
 ## Rules
 
-- **`cr doctor` first, every time.** A failed check stops the skill; don't attempt the review anyway.
+- **`coderabbit doctor` first, every time.** A failed check stops the skill; don't attempt the review anyway.
 - **The arithmetic must close.** Fixing + not fixing + skipped = findings reported. Print the total in the heading and re-check it before showing the plan.
 - **Skipped is a list, not a count.** One line per skipped finding with its path and reason, even for Trivial.
 - **Number every finding sequentially across the whole report** — Fixing, then Not fixing, then Skipped, never restarting per section. The last number equals the total in the heading, and "apply 3 and 7" means exactly two findings. Keep the same numbers when you report what changed after approval.
@@ -110,4 +110,4 @@ It exists so a driving agent, PR template or hook can check the step ran and clo
 - **Fix the cause, not the line.** If the same finding pattern hits three files and the bot flagged one, fix all three and say so.
 - **Read-only against git.** No commits, no stashing, no branch switching — review what is on disk now.
 - **No preamble.** Start with the `## CodeRabbit — <branch> vs <base>` heading.
-- **Always end with the gate line** — including when `cr doctor` stops the run or the branch is empty.
+- **Always end with the gate line** — including when `coderabbit doctor` stops the run or the branch is empty.

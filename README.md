@@ -9,7 +9,7 @@ Personal [Claude Code skills](https://code.claude.com/docs/en/skills): each top-
 | `checklist` | Convert the current plan/review/task list in context into a persistent markdown checklist under `.claude/plans/` |
 | `code-review` | Review staged changes or a specific area, optionally delegating to a chosen agent |
 | `coderabbit` | Chew through CodeRabbit's PR comments: skip Trivial/Minor with a reason, verify Major+ against current code, plan, then apply after approval |
-| `coderabbit-local` | Run CodeRabbit via the `cr` CLI on the branch's changes since it diverged (no PR needed), gated on `cr doctor`, then triage as above |
+| `coderabbit-local` | Run CodeRabbit via the `coderabbit` CLI on the branch's changes since it diverged (no PR needed), gated on `coderabbit doctor`, then triage as above |
 | `feature-generator` | Expand `spec.md` into a dependency-ordered `features.md`, and keep the two in sync |
 | `first-five` | Scan a diff against the First Five checklist (error handling, input boundaries, external calls, state mutations, assumed dependencies) |
 | `playwright-cli` | Vendored from [microsoft/playwright-cli](https://github.com/microsoft/playwright-cli) — reference for driving a browser via the Playwright CLI; do not edit, see Skill provenance |
@@ -33,7 +33,7 @@ One vocabulary everywhere: `🔴 Critical` > `🟠 Major` > `🟡 Minor` > `🔵
 
 - **PASS** — nothing to act on, or everything dispositioned with a stated reason.
 - **OPEN** — findings exist, nobody has dispositioned them yet. Transient: it must not survive the turn. `triage` and `zombies` can only ever emit `OPEN`, because by design they decide nothing themselves.
-- **BLOCKED** — the agent may not proceed alone: a `warm` Hold, a failed `cr doctor`, a real defect the user declined to fix.
+- **BLOCKED** — the agent may not proceed alone: a `warm` Hold, a failed `coderabbit doctor`, a real defect the user declined to fix.
 
 Whoever acts on a report re-emits its gate line after acting. **The last gate line of the turn is the one that counts** — that's what makes "the report alone is never the deliverable" mechanically checkable instead of a rule in prose.
 
