@@ -2,7 +2,7 @@
 name: warm
 description: Evaluate every dependency a branch pulls in — client or server, any language — against the WARM check (Worth it, Alive, Right-sized, Maintained securely) plus a supply-chain Safety check (install scripts, typosquatting, release freshness). Diffs the branch against a base, finds newly added or upgraded direct dependencies across all manifests, and scores each one. Use when the user asks to "WARM check" a branch, vet new dependencies, or review what a PR adds to the dependency tree — and proactively after you add or upgrade a dependency yourself.
 argument-hint: "[base branch]"
-allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(git rev-parse:*), Bash(git status:*), Bash(git show:*), Bash(bun info:*), Bash(bun audit:*), Bash(composer audit:*), Bash(pip-audit:*), Bash(curl:*), Bash(cat:*), Bash(find:*), Bash(ls:*), Bash(grep:*), Read, Grep, Glob, WebSearch, WebFetch"
+allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(git rev-parse:*), Bash(git status:*), Bash(git show:*), Bash(bun info:*), Bash(bun audit:*), Bash(composer audit:*), Bash(pip-audit:*), Bash(curl -s https://api.npmjs.org/:*), Bash(cat:*), Bash(find:*), Bash(ls:*), Bash(grep:*), Read, Grep, Glob, WebSearch, WebFetch"
 ---
 
 # WARM
@@ -97,7 +97,7 @@ bun info <pkg> --json           # everything at once
 curl -s https://api.npmjs.org/downloads/point/last-week/<pkg>
 ```
 
-Three constraints: `bun info` takes **one field per call** — `bun info preact name version` prints only `name`, so either one call per field or `--json` and parse it; it must run **inside a directory with a `package.json`** or it errors out; and bun has **no download counts**, so weekly downloads still come from the npmjs API via `curl`.
+Three constraints: `bun info` takes **one field per call** — `bun info preact name version` prints only `name`, so either one call per field or `--json` and parse it; it must run **inside a directory with a `package.json`** or it errors out; and bun has **no download counts**, so weekly downloads still come from the npmjs API via `curl` — exactly as written above. `curl` is allowlisted for `https://api.npmjs.org/` only; any other host goes through `WebFetch`.
 
 - **A (Alive)**: check the registry/repo for last release date and recent commit activity. Use `bun info <pkg> time.modified` / `WebFetch` the repo page. Note the latest release date and whether the repo is archived.
 - **R (Right-sized)**: compare the dependency's footprint (sub-dependencies, install size, breadth of API) against the slice the branch uses. Pulling a 40-dependency framework to call one helper is not right-sized.

@@ -2,6 +2,7 @@
 name: preflight
 description: Reads the diff between the current branch and its base branch and produces a production pre-flight checklist of everything that must be done or configured once the change merges. Use before merging or deploying a branch.
 argument-hint: "[branch]"
+allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git rev-parse:*), Read, Grep, Glob"
 ---
 
 # Preflight
