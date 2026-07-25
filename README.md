@@ -9,6 +9,7 @@ Personal [Claude Code skills](https://code.claude.com/docs/en/skills): each top-
 | `checklist` | Convert the current plan/review/task list in context into a persistent markdown checklist under `.claude/plans/` |
 | `code-review` | Review staged changes or a specific area, optionally delegating to a chosen agent |
 | `coderabbit` | Chew through CodeRabbit's PR comments: skip Trivial/Minor with a reason, verify Major+ against current code, plan, then apply after approval |
+| `coderabbit-local` | Run CodeRabbit via the `cr` CLI on the branch's changes since it diverged (no PR needed), gated on `cr doctor`, then triage as above |
 | `feature-generator` | Expand `spec.md` into a dependency-ordered `features.md`, and keep the two in sync |
 | `first-five` | Scan a diff against the First Five checklist (error handling, input boundaries, external calls, state mutations, assumed dependencies) |
 | `playwright-cli` | Vendored from [microsoft/playwright-cli](https://github.com/microsoft/playwright-cli) — reference for driving a browser via the Playwright CLI; do not edit, see Skill provenance |
@@ -20,7 +21,7 @@ Personal [Claude Code skills](https://code.claude.com/docs/en/skills): each top-
 | `warm` | Vet dependencies a branch adds against the WARM check (Worth it, Alive, Right-sized, Maintained securely) plus a supply-chain Safety check (install scripts, typosquatting, release freshness) |
 | `zombies` | Suggest tests worth writing via the ZOMBIES heuristic (Zero, One, Many, Boundaries, Interface, Exceptions, Simple) |
 
-`triage`, `warm`, `zombies`, `preflight`, `spec-generator`, `feature-generator` and `playwright-cli` can be invoked by the agent on its own; the rest carry `disable-model-invocation: true` and answer only to `/name`. The diff-based skills (`triage`, `warm`, `zombies`, `first-five`, `review-order`, `preflight`) take an optional base branch, detected from `origin/HEAD` and falling back to `main`.
+`triage`, `warm`, `zombies`, `preflight`, `coderabbit-local`, `spec-generator`, `feature-generator` and `playwright-cli` can be invoked by the agent on its own; the rest carry `disable-model-invocation: true` and answer only to `/name`. The diff-based skills (`triage`, `warm`, `zombies`, `first-five`, `review-order`, `preflight`, `coderabbit-local`) take an optional base branch, detected from `origin/HEAD` and falling back to `main`.
 
 ## Linking
 
