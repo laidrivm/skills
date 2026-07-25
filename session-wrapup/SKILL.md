@@ -1,13 +1,13 @@
 ---
 name: session-wrapup
-description: End-of-session ritual — confidence check on what was built, fix & capture pass for uncaptured lessons, OpenSpec workflow state with the next command, and an optional save-point doc for long exploratory sessions.
+description: End-of-session ritual — confidence check on what was built, fix & capture pass for uncaptured lessons, OpenSpec workflow state with the next command, an optional save-point doc for long exploratory sessions, and a pipeline-yield line recording what each review skill actually found.
 disable-model-invocation: true
 allowed-tools: "Read, Write, Glob, Grep, Bash(git log:*), Bash(git status:*), Bash(git diff:*), Bash(ls:*), Bash(date:*), Bash(mkdir:*)"
 ---
 
 # Session Wrap-up
 
-Walk the four steps below over **this session's conversation**, in order, under these exact headings. Be honest and specific — this is a debrief, not a victory lap.
+Walk the five steps below over **this session's conversation**, in order, under these exact headings. Be honest and specific — this is a debrief, not a victory lap.
 
 ## 1. Confidence check
 
@@ -42,8 +42,34 @@ When it applies, write `docs/context/<topic>-<yyyy-mm>.md` (get the date with `d
 
 Facts and dead ends, no narrative of the session. Link files as `path:line` where relevant.
 
+## 5. Pipeline yield
+
+Which review skills ran this session, and what each one actually produced. One line per skill that ran, in the order they ran:
+
+```
+- <skill>: <gate line state> — N findings, M acted on
+```
+
+Then one line naming the review skills that **didn't** run, so the gap is visible rather than assumed.
+
+A skill that ran and found nothing is the point of this step, not a boring result — record it as `0 findings`. Over a month of sessions this is what shows which step of the pipeline has never once caught anything, so the pipeline gets shortened on evidence instead of by feel. Count only findings the skill itself reported; don't reclassify them.
+
+Append the same lines to `docs/context/pipeline-yield.md` under a `## <yyyy-mm-dd> — <branch>` heading (get the date with `date +%F`; create the file with a `# Pipeline yield` heading if it doesn't exist). Append only — never rewrite or prune earlier sessions; the value is in the accumulation.
+
+Example:
+
+```
+- triage: OPEN — 4 groups, 2 high-risk — High/Medium read
+- warm: PASS — 2 dependencies vetted, 0 findings, 0 acted on
+- first-five: 3 findings, 2 acted on (1 rejected: false positive on a retried job)
+- zombies: OPEN — 6 gaps, 6 acted on
+- coderabbit-local: PASS — 7 findings, 7 dispositioned (3 fixed, 4 skipped)
+- Not run: review-order, code-review, preflight
+```
+
 ## Rules
 
-- Always all four headings, in order — steps that don't apply get their one-line skip note, not silence.
+- Always all five headings, in order — steps that don't apply get their one-line skip note, not silence.
 - Ground every claim in the actual session: quote the correction, name the file, cite the commit. No generic retrospective filler.
-- The only file this skill may create is the step-4 save point. Everything else is a report.
+- The only files this skill may touch are the step-4 save point and the step-5 yield ledger, and the ledger is append-only. Everything else is a report.
+- **Never leave step 5 out because "nothing interesting ran".** A session where no review skill ran is itself the data point — record it as `Not run: <all of them>`.
