@@ -54,7 +54,7 @@ Then one line naming the review skills that **didn't** run, so the gap is visibl
 
 A skill that ran and found nothing is the point of this step, not a boring result — record it as `0 findings`. Over a month of sessions this is what shows which step of the pipeline has never once caught anything, so the pipeline gets shortened on evidence instead of by feel. Count only findings the skill itself reported; don't reclassify them.
 
-Append the same lines to `docs/context/pipeline-yield.md` under a `## <yyyy-mm-dd> — <branch>` heading (get the date with `date +%F`; create the file with a `# Pipeline yield` heading if it doesn't exist). Append only — never rewrite or prune earlier sessions; the value is in the accumulation.
+Append the same lines to `docs/context/pipeline-yield-<yyyy-mm>.md` under a `## <yyyy-mm-dd> — <branch>` heading (get the date with `date +%F` and the month with `date +%Y-%m` — a new month starts a new file; create the file with a `# Pipeline yield` heading if it doesn't exist). Append only — never rewrite or prune earlier sessions; the value is in the accumulation.
 
 Example:
 
