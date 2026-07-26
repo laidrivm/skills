@@ -38,6 +38,8 @@ coderabbit review --base <base> --agent --config .coderabbit.yaml CLAUDE.md
 
 This reviews the branch's tracked changes (committed, staged and unstaged) against `<base>`. It commonly takes several minutes — give the call a generous timeout and don't rerun it because it seems slow. Add `--include-untracked` when new files aren't staged yet, and `--light` only if the user asks for a faster, shallower pass.
 
+The review quota is shared with the CodeRabbit web app, so a local run can be refused because of reviews started in the browser. The CLI's message mentions only billing, which reads as a plan problem when it is not.
+
 `--agent` gives structured findings instead of prose — the CLI itself recommends it under Claude. `--config` takes the files the CLI does *not* pick up on its own; drop from the list whichever doesn't exist in the repo, and add other convention files (`AGENTS.md`, `.cursorrules`) when they do.
 
 ### 3. Sort by severity
@@ -85,6 +87,8 @@ CODERABBIT gate: OPEN — 5 findings, 2 fixes awaiting approval.
 
 Wait for approval. Then apply the approved fixes with `Edit`, and report what changed.
 
+**The project overrides this.** If the repo's own review policy (`CLAUDE.md`, `docs/`, a gate the project defines) prescribes applying findings at or above some severity without asking, follow the project, not this skill: apply those fixes before showing the plan, list them under a `### Applied (N)` section saying what changed, and keep the approval gate only for what falls below the threshold. Name the rule you followed in one line under the heading.
+
 ### 5. Gate line
 
 Every output ends with a machine-readable last line, exactly one of:
@@ -95,17 +99,18 @@ Every output ends with a machine-readable last line, exactly one of:
 - `CODERABBIT gate: OPEN — N findings, M fixes awaiting approval.` (the plan in step 4, before the user answers)
 - `CODERABBIT gate: BLOCKED — N findings, M undispositioned.` (the arithmetic didn't close, or a real defect was declined — name them)
 - `CODERABBIT gate: BLOCKED — coderabbit doctor failed: <check>.` (step 1 stopped the run; no review happened)
+- `CODERABBIT gate: BLOCKED — review refused: <reason>.` (step 2 never produced findings — rate limit, auth revoked mid-run, service error; name the reason and the wait if the CLI gives one)
 
 It exists so a driving agent, PR template or hook can check the step ran and closed without re-parsing the report.
 
 ## Rules
 
 - **`coderabbit doctor` first, every time.** A failed check stops the skill; don't attempt the review anyway.
-- **The arithmetic must close.** Fixing + not fixing + skipped = findings reported. Print the total in the heading and re-check it before showing the plan.
+- **The arithmetic must close.** Applied + fixing + not fixing + skipped = findings reported. Print the total in the heading and re-check it before showing the plan.
 - **Skipped is a list, not a count.** One line per skipped finding with its path and reason, even for Trivial.
-- **Number every finding sequentially across the whole report** — Fixing, then Not fixing, then Skipped, never restarting per section. The last number equals the total in the heading, and "apply 3 and 7" means exactly two findings. Keep the same numbers when you report what changed after approval.
+- **Number every finding sequentially across the whole report** — Applied, then Fixing, then Not fixing, then Skipped, never restarting per section. The last number equals the total in the heading, and "apply 3 and 7" means exactly two findings. Keep the same numbers when you report what changed after approval.
 - **Severity budgets attention, not belief.** A Minor is skipped because you read it and judged the change not worth making, never because of its label.
-- **No fixes before approval.** Steps 1–3 change nothing on disk.
+- **No fixes before approval**, unless the project's own policy says to auto-apply above a severity threshold (step 4). Steps 1–3 change nothing on disk either way.
 - **Rejections need a concrete reason** — what the bot missed, not "not applicable".
 - **Fix the cause, not the line.** If the same finding pattern hits three files and the bot flagged one, fix all three and say so.
 - **Read-only against git.** No commits, no stashing, no branch switching — review what is on disk now.
