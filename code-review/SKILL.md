@@ -54,6 +54,8 @@ The same four levels CodeRabbit uses, high to low — one vocabulary across ever
 
 Don't invent levels outside this ladder — no `Error`, `Warning`, `Suggestion` or `Nitpick`.
 
+A fact about the environment the change lands in — repo conventions, a missing CI job, how downstream consumes it — is **not a defect in the change** and gets no severity. Say it under `## Summary` as an environment note, and let the verdict stand on the findings.
+
 ### Output format
 
 Group findings by severity. Each severity level that has findings should be its own heading (e.g. `## 🔴 Critical`, `## 🟠 Major`, etc.). Number the findings sequentially across the whole report, never restarting per heading, so "fix 3 and 7" means exactly two findings. For each finding, include:

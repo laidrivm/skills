@@ -112,6 +112,7 @@ It exists so a driving agent, PR template or hook can check the step ran and clo
 - **Severity budgets attention, not belief.** A Minor is skipped because you read it and judged the change not worth making, never because of its label.
 - **No fixes before approval**, unless the project's own policy says to auto-apply above a severity threshold (step 4). Steps 1–3 change nothing on disk either way.
 - **Rejections need a concrete reason** — what the bot missed, not "not applicable".
+- **The environment is not a finding.** A fact about where the diff lands — repo conventions, a missing CI job, how downstream consumes the change — is not a defect in the diff and never holds the gate `BLOCKED`. Close the gate on the findings and report the environment fact separately, below the gate line.
 - **Fix the cause, not the line.** If the same finding pattern hits three files and the bot flagged one, fix all three and say so.
 - **Read-only against git.** No commits, no stashing, no branch switching — review what is on disk now.
 - **No preamble.** Start with the `## CodeRabbit — <branch> vs <base>` heading.
