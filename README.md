@@ -13,15 +13,17 @@ Personal [Claude Code skills](https://code.claude.com/docs/en/skills): each top-
 | `feature-generator` | Expand `spec.md` into a dependency-ordered `features.md`, and keep the two in sync |
 | `first-five` | Scan a diff against the First Five checklist (error handling, input boundaries, external calls, state mutations, assumed dependencies) |
 | `playwright-cli` | Vendored from [microsoft/playwright-cli](https://github.com/microsoft/playwright-cli) — reference for driving a browser via the Playwright CLI; do not edit, see Skill provenance |
+| `pr-brief` | Compose the PR title and description once the gates pass — reads the gate lines, the diff and the plan, writes nothing |
 | `preflight` | Production pre-flight checklist for a branch: env vars, config, migrations — everything needed once it merges |
 | `review-order` | Scannable review checklist grouped by feature, four-pass order (types, data flow, business logic, edge cases) |
 | `session-wrapup` | End-of-session debrief: confidence check, fix & capture pass, OpenSpec state + next command, optional save-point doc, pipeline yield per review skill |
+| `ship` | Push, open or update the PR, wait for CodeRabbit on that SHA, work the findings, repeat, then merge on approval and return to an up-to-date base |
 | `spec-generator` | Turn a vague product idea (plus sketches/notes) into a structured product spec |
 | `triage` | Group a diff into feature areas with risk tiers to decide where review time goes |
 | `warm` | Vet dependencies a branch adds against the WARM check (Worth it, Alive, Right-sized, Maintained securely) plus a supply-chain Safety check (install scripts, typosquatting, release freshness) |
 | `zombies` | Suggest tests worth writing via the ZOMBIES heuristic (Zero, One, Many, Boundaries, Interface, Exceptions, Simple) |
 
-`triage`, `warm`, `zombies`, `preflight`, `coderabbit-local`, `spec-generator`, `feature-generator` and `playwright-cli` can be invoked by the agent on its own; the rest carry `disable-model-invocation: true` and answer only to `/name`. The diff-based skills (`triage`, `warm`, `zombies`, `first-five`, `review-order`, `preflight`, `coderabbit-local`) take an optional base branch, detected from `origin/HEAD` and falling back to `main`.
+Whether a skill answers only to `/name` (`disable-model-invocation: true`) and whether it takes a base branch are recorded once, in each skill's frontmatter and `argument-hint`. This README deliberately doesn't restate them: a restatement drifts silently, because nothing breaks when it's wrong.
 
 ## Severity
 
@@ -52,7 +54,7 @@ It refuses to overwrite existing files or links pointing elsewhere — use `--un
 
 ## Adding a skill
 
-Create `<name>/SKILL.md` with `name` and `description` frontmatter; `link.sh all` picks it up automatically.
+Create `<name>/SKILL.md` with `name` and `description` frontmatter; `link.sh all` picks it up automatically. Add a row to the table above — name and one line, nothing the frontmatter already says.
 
 ## Skill provenance
 
