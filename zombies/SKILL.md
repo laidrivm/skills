@@ -2,7 +2,7 @@
 name: zombies
 description: Suggest tests worth writing for a feature using the ZOMBIES heuristic (Zero, One, Many, Boundaries, Interface, Exceptions, Simple scenarios). Pass a free-text feature description, or omit args to use the current branch's diff. Outputs only the categories that apply — not a full ZOMBIES checklist. Use when the user asks what tests to write, and proactively after implementing a feature to surface test gaps.
 argument-hint: "[--base <branch>] [feature description]"
-allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(git rev-parse:*), Bash(git status:*), Bash(find:*), Bash(ls:*), Bash(grep:*), Read, Grep, Glob"
+allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(git rev-parse:*), Bash(git symbolic-ref:*), Bash(git status:*), Bash(find:*), Bash(ls:*), Bash(grep:*), Read, Grep, Glob"
 ---
 
 # ZOMBIES
@@ -13,7 +13,7 @@ Raw arguments: $ARGUMENTS
 
 If the arguments start with `--base <branch>`, use `<branch>` as the base branch and treat the rest as the feature description. Otherwise treat all arguments as a **free-text feature description** (e.g. "sign-in code login flow", "image upload validation") and locate the relevant code and tests yourself using `Grep`/`Glob`.
 
-If no base branch was given, detect the default branch with `git rev-parse --abbrev-ref origin/HEAD` (strip the `origin/` prefix); if that fails, fall back to `main`. Call the result `<base>`.
+If no base branch was given, detect the default branch with `git symbolic-ref --quiet --short refs/remotes/origin/HEAD`, which prints nothing when it is unset — not `git rev-parse --abbrev-ref origin/HEAD`, which echoes its argument back and resolves to the literal `HEAD`. Use the ref whole (`origin/main`); if it is empty, fall back to `main`. Call the result `<base>`.
 
 If no feature description remains, run `git diff <base>...HEAD` and use the diff as the feature scope.
 

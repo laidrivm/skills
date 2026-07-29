@@ -2,7 +2,7 @@
 name: preflight
 description: Reads the diff between the current branch and its base branch and produces a production pre-flight checklist of everything that must be done or configured once the change merges. Use before merging or deploying a branch.
 argument-hint: "[branch]"
-allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git rev-parse:*), Read, Grep, Glob"
+allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git rev-parse:*), Bash(git symbolic-ref:*), Read, Grep, Glob"
 ---
 
 # Preflight
@@ -13,7 +13,7 @@ Produce a production pre-flight checklist for the current branch.
 
 Raw arguments: $ARGUMENTS
 
-Parse the arguments as the **base branch** to diff against. If empty, detect the default branch with `git rev-parse --abbrev-ref origin/HEAD` (strip the `origin/` prefix); if that fails, fall back to `main`.
+Parse the arguments as the **base branch** to diff against. If empty, detect the default branch with `git symbolic-ref --quiet --short refs/remotes/origin/HEAD`, which prints nothing when it is unset — not `git rev-parse --abbrev-ref origin/HEAD`, which echoes its argument back and resolves to the literal `HEAD`. Use the ref whole (`origin/main`); if it is empty, fall back to `main`.
 
 ## Steps
 

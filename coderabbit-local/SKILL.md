@@ -2,7 +2,7 @@
 name: coderabbit-local
 description: Run CodeRabbit locally with the `coderabbit` CLI against the changes this branch made since it diverged from its base — no PR needed — then triage the findings the same way the `coderabbit` skill triages PR comments. Use when the user wants a CodeRabbit review before pushing or opening a PR, asks to "run coderabbit", "coderabbit review", or wants the bot's take on the current branch.
 argument-hint: "[base branch] [--all]"
-allowed-tools: "Bash(coderabbit doctor:*), Bash(coderabbit review:*), Bash(git diff:*), Bash(git log:*), Bash(git rev-parse:*), Bash(git status:*), Read, Edit, Grep, Glob"
+allowed-tools: "Bash(coderabbit doctor:*), Bash(coderabbit review:*), Bash(git diff:*), Bash(git log:*), Bash(git rev-parse:*), Bash(git symbolic-ref:*), Bash(git status:*), Read, Edit, Grep, Glob"
 ---
 
 # CodeRabbit (local CLI)
@@ -13,7 +13,7 @@ For findings on an existing PR, use the `coderabbit` skill instead — this one 
 
 Raw arguments: $ARGUMENTS
 
-- A branch name → the **base branch** to review against. If empty, detect the default branch with `git rev-parse --abbrev-ref origin/HEAD` (strip the `origin/` prefix); if that fails, fall back to `main`. Call the result `<base>`.
+- A branch name → the **base branch** to review against. If empty, detect the default branch with `git symbolic-ref --quiet --short refs/remotes/origin/HEAD`, which prints nothing when it is unset — not `git rev-parse --abbrev-ref origin/HEAD`, which echoes its argument back and resolves to the literal `HEAD`. Use the ref whole (`origin/main`); if it is empty, fall back to `main`. Call the result `<base>`.
 - `--all` → give 🔵 Trivial the same reading 🟡 Minor gets.
 
 ## Instructions

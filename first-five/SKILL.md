@@ -3,7 +3,7 @@ name: first-five
 description: Scan a branch or diff against the First Five checklist (Error Handling, Input Boundaries, External Calls, State Mutations, Assumed Dependencies) and report only genuine concerns. Use when the user asks to "run the first five" on a branch or diff.
 argument-hint: "[branch]"
 disable-model-invocation: true
-allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(git rev-parse:*), Bash(git status:*), Bash(find:*), Bash(ls:*), Bash(grep:*), Read, Grep, Glob"
+allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(git rev-parse:*), Bash(git symbolic-ref:*), Bash(git status:*), Bash(find:*), Bash(ls:*), Bash(grep:*), Read, Grep, Glob"
 ---
 
 # First Five
@@ -12,7 +12,7 @@ allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(
 
 Raw arguments: $ARGUMENTS
 
-Parse the arguments as the **base branch** to diff against. If empty, detect the default branch with `git rev-parse --abbrev-ref origin/HEAD` (strip the `origin/` prefix); if that fails, fall back to `main`.
+Parse the arguments as the **base branch** to diff against. If empty, detect the default branch with `git symbolic-ref --quiet --short refs/remotes/origin/HEAD`, which prints nothing when it is unset — not `git rev-parse --abbrev-ref origin/HEAD`, which echoes its argument back and resolves to the literal `HEAD`. Use the ref whole (`origin/main`); if it is empty, fall back to `main`.
 
 ## Goal
 

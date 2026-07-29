@@ -2,7 +2,7 @@
 name: triage
 description: Triage a branch or diff by grouping changed files into feature areas, assigning each a risk tier (High/Medium/Low), and producing a scannable summary that helps decide where to spend review time. Use when the user asks to "triage" a branch, PR, or diff, and as the first step before reviewing a branch or PR that touches more than a couple of files.
 argument-hint: "[branch]"
-allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(git rev-parse:*), Bash(git status:*), Read, Grep, Glob"
+allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(git rev-parse:*), Bash(git symbolic-ref:*), Bash(git status:*), Read, Grep, Glob"
 ---
 
 # Triage
@@ -11,7 +11,7 @@ allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(
 
 Raw arguments: $ARGUMENTS
 
-Parse the arguments as the **base branch** to diff against. If empty, detect the default branch with `git rev-parse --abbrev-ref origin/HEAD` (strip the `origin/` prefix); if that fails, fall back to `main`.
+Parse the arguments as the **base branch** to diff against. If empty, detect the default branch with `git symbolic-ref --quiet --short refs/remotes/origin/HEAD`, which prints nothing when it is unset — not `git rev-parse --abbrev-ref origin/HEAD`, which echoes its argument back and resolves to the literal `HEAD`. Use the ref whole (`origin/main`); if it is empty, fall back to `main`.
 
 ## Goal
 

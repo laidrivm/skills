@@ -3,7 +3,7 @@ name: ship
 description: Land the branch — push it, open or update the PR, wait for CodeRabbit's review, work the findings through the `coderabbit` skill, repeat until the PR is clean, then merge on approval and return to an up-to-date base branch. Use when the user asks to "ship it", "land this", "push and merge", or wants the push → review → fix → merge loop driven end to end.
 argument-hint: "[base branch]"
 disable-model-invocation: true
-allowed-tools: "Bash(git push:*), Bash(git checkout:*), Bash(git pull:*), Bash(git commit:*), Bash(git add:*), Bash(git status:*), Bash(git log:*), Bash(git diff:*), Bash(git rev-parse:*), Bash(gh pr:*), Bash(gh api:*), Bash(gh repo view:*), Bash(sleep:*), Read, Edit, Grep, Glob, Skill"
+allowed-tools: "Bash(git push:*), Bash(git checkout:*), Bash(git pull:*), Bash(git commit:*), Bash(git add:*), Bash(git status:*), Bash(git log:*), Bash(git diff:*), Bash(git rev-parse:*), Bash(git symbolic-ref:*), Bash(gh pr:*), Bash(gh api:*), Bash(gh repo view:*), Bash(sleep:*), Read, Edit, Grep, Glob, Skill"
 ---
 
 # Ship
@@ -12,7 +12,7 @@ allowed-tools: "Bash(git push:*), Bash(git checkout:*), Bash(git pull:*), Bash(g
 
 Raw arguments: $ARGUMENTS
 
-Parse the arguments as the **base branch** to merge into. If empty, detect the default branch with `git rev-parse --abbrev-ref origin/HEAD` (strip the `origin/` prefix); if that fails, fall back to `main`. Call the result `<base>`.
+Parse the arguments as the **base branch** to merge into. If empty, detect the default branch with `git symbolic-ref --quiet --short refs/remotes/origin/HEAD` and strip the `origin/` prefix — `<base>` gets checked out and merged into, so it must be a local branch name. Don't use `git rev-parse --abbrev-ref origin/HEAD`, which echoes its argument back and resolves to the literal `HEAD`. If the result is empty, fall back to `main`. Call the result `<base>`.
 
 ## Goal
 

@@ -2,7 +2,7 @@
 name: warm
 description: Evaluate every dependency a branch pulls in — client or server, any language — against the WARM check (Worth it, Alive, Right-sized, Maintained securely) plus a supply-chain Safety check (install scripts, typosquatting, release freshness). Diffs the branch against a base, finds newly added or upgraded direct dependencies across all manifests, and scores each one. Use when the user asks to "WARM check" a branch, vet new dependencies, or review what a PR adds to the dependency tree — and proactively after you add or upgrade a dependency yourself.
 argument-hint: "[base branch]"
-allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(git rev-parse:*), Bash(git status:*), Bash(git show:*), Bash(bun info:*), Bash(bun audit:*), Bash(composer audit:*), Bash(pip-audit:*), Bash(curl -s https://api.npmjs.org/:*), Bash(cat:*), Bash(find:*), Bash(ls:*), Bash(grep:*), Read, Grep, Glob, WebSearch, WebFetch"
+allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(git rev-parse:*), Bash(git symbolic-ref:*), Bash(git status:*), Bash(git show:*), Bash(bun info:*), Bash(bun audit:*), Bash(composer audit:*), Bash(pip-audit:*), Bash(curl -s https://api.npmjs.org/:*), Bash(cat:*), Bash(find:*), Bash(ls:*), Bash(grep:*), Read, Grep, Glob, WebSearch, WebFetch"
 ---
 
 # WARM
@@ -11,7 +11,7 @@ allowed-tools: "Bash(git diff:*), Bash(git log:*), Bash(git merge-base:*), Bash(
 
 Raw arguments: $ARGUMENTS
 
-Parse the arguments as the **base branch** to diff against. If empty, detect the default branch with `git rev-parse --abbrev-ref origin/HEAD` (strip the `origin/` prefix); if that fails, fall back to `main`.
+Parse the arguments as the **base branch** to diff against. If empty, detect the default branch with `git symbolic-ref --quiet --short refs/remotes/origin/HEAD`, which prints nothing when it is unset — not `git rev-parse --abbrev-ref origin/HEAD`, which echoes its argument back and resolves to the literal `HEAD`. Use the ref whole (`origin/main`); if it is empty, fall back to `main`.
 
 ## Goal
 
