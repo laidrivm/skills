@@ -118,12 +118,15 @@ CODERABBIT gate: OPEN — 7 findings, 3 fixes awaiting approval.
 
 Wait for approval. Then apply the approved fixes with `Edit`, and report what changed.
 
+**The project overrides this.** If the repo's own review policy (`CLAUDE.md`, `docs/`, a gate the project defines) prescribes applying verified findings without asking, follow the project, not this skill: apply them before showing the plan, list them under `### Applied (N)`, and keep no approval gate on fixes at any severity. Where the project puts the approval on the dismissal instead, a 🟠 Major or 🔴 Critical you propose to reject or skip goes to the user with what the bot missed, and the gate stays OPEN until they settle it. Name the rule you followed in one line under the heading.
+
 ### 6. Gate line
 
 Every output ends with a machine-readable last line, exactly one of:
 
 - `CODERABBIT gate: PASS — N findings, N dispositioned.` (every finding fixed, skipped or rejected — nothing left to do)
 - `CODERABBIT gate: OPEN — N findings, M fixes awaiting approval.` (the plan in step 5, before the user answers)
+- `CODERABBIT gate: OPEN — N findings, M dismissals awaiting the user.` (fixes already applied under a project policy; what waits is a Major+ you propose to reject or skip)
 - `CODERABBIT gate: BLOCKED — N findings, M undispositioned.` (the arithmetic didn't close, or the user declined a fix that is still a real defect — name them)
 
 It exists so a driving agent, PR template or hook can check the step ran and closed without re-parsing the report.
@@ -131,14 +134,14 @@ It exists so a driving agent, PR template or hook can check the step ran and clo
 ## Rules
 
 - **Never post to the PR.** No replies, no resolves, no reactions, no `gh pr comment`. Read-only against GitHub.
-- **The arithmetic must close.** Fixing + not fixing + skipped = findings fetched. Print the total in the heading and re-check it before showing the plan — a finding that appears in no section is exactly the failure this skill exists to prevent.
+- **The arithmetic must close.** Applied + fixing + not fixing + skipped = findings fetched. Print the total in the heading and re-check it before showing the plan — a finding that appears in no section is exactly the failure this skill exists to prevent.
 - **Skipped is a list, not a count.** One line per skipped finding with its path and reason, even for Trivial.
-- **Number every finding sequentially across the whole report** — Fixing, then Not fixing, then Skipped, never restarting per section. The last number equals the total in the heading, and "apply 3 and 7" means exactly two findings. Keep the same numbers when you report what changed after approval.
+- **Number every finding sequentially across the whole report** — Applied, then Fixing, then Not fixing, then Skipped, never restarting per section. The last number equals the total in the heading, and "apply 3 and 7" means exactly two findings. Keep the same numbers when you report what changed after approval.
 - **Severity budgets attention, not belief.** A Minor is skipped because you
   read it and judged the change not worth making, never because of its label.
 - **Verify before believing.** A Major finding still gets read against current code; the bot reviews a snapshot, the branch has moved.
 - **The environment is not a finding.** A fact about where the diff lands — repo conventions, a missing CI job, how downstream consumes the change — is not a defect in the diff and never holds the gate `BLOCKED`. Close the gate on the findings and report the environment fact separately, below the gate line.
-- **No fixes before approval.** Steps 1–4 change nothing on disk.
+- **No fixes before approval**, unless the project's own policy overrides it (step 5). Where it does, the approval moves rather than disappears: it attaches to dismissing a Major or above. Steps 1–4 change nothing on disk either way.
 - **Rejections need a concrete reason** — what the bot missed, not "not applicable".
 - **Fix the cause, not the line.** If the same finding pattern hits three files and the bot flagged one, fix all three and say so.
 - **No preamble.** Start with the `## CodeRabbit — PR #N` heading.
